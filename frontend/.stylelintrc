@@ -1,0 +1,42 @@
+{
+  "extends": [
+    "stylelint-config-sass-guidelines",
+    "stylelint-config-recess-order",
+    "stylelint-prettier/recommended",
+    "stylelint-config-prettier"
+  ],
+  "plugins": [
+    "stylelint-prettier",
+    "stylelint-order",
+    "stylelint-scss"
+  ],
+  "ignoreFiles": [
+    "**/node_modules/**"
+  ],
+  "rules": {
+    "indentation": null,
+    "prettier/prettier": true,
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": true,
+    "selector-pseudo-class-no-unknown": [
+      true,
+      {
+        "ignorePseudoClasses": [
+          "host"
+        ]
+      }
+    ],
+    "max-nesting-depth": [
+      10,
+      {
+        "ignore": [
+          "blockless-at-rules",
+          "pseudo-classes"
+        ]
+      }
+    ],
+    "selector-max-compound-selectors": 10,
+    "selector-no-qualifying-type": null,
+    "order/properties-alphabetical-order": null
+  }
+}
