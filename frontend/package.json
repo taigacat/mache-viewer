@@ -1,6 +1,16 @@
 {
   "name": "mache-viewer",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "mache.tv"
+  ],
+  "homepage": "https://github.com/taigacat/mache-viewer#readme",
+  "bugs": {
+    "url": "https://github.com/taigacat/mache-viewer/issues"
+  },
+  "license": "MIT",
+  "author": "taigacat",
   "scripts": {
     "build": "ng cache clean && ng build --configuration production",
     "build:ci": "ng build --aot --build-optimizer --optimization --progress --stats-json",
