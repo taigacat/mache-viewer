@@ -1,0 +1,32 @@
+{
+  "root": true,
+  "plugins": [
+    "import"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+    "plugin:prettier/recommended",
+    "prettier"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "overrides": [
+    {
+      "files": [
+        "*.ts",
+        "*.spec.ts"
+      ],
+      "rules": {
+        "no-console": 1,
+        "linebreak-style": [
+          "error",
+          "unix"
+        ]
+      }
+    }
+  ]
+}
