@@ -2,25 +2,24 @@
   "name": "mache-viewer",
   "version": "0.0.0",
   "scripts": {
-    "ng": "ng",
-    "env": "echo ${BUILD_VERSION}",
-    "start:remote": "ng serve --configuration development --hmr",
-    "start": "ng cache clean && ng serve --configuration local --hmr",
-    "watch": "ng cache clean && ng build --watch --configuration development",
     "build": "ng cache clean && ng build --configuration production",
     "build:ci": "ng build --aot --build-optimizer --optimization --progress --stats-json",
-    "test": "jest",
-    "test:unit": "jest --coverage",
-    "test:snapshot": "jest --coverage=false -c jest.config.snap.js",
-    "test:snapshot.update": "jest --coverage=false -c jest.config.snap.js -u",
-    "test:all": "npm run test:unit && npm run test:snapshot",
-    "test:ci": "npm run test:unit -- -i --ci && npm run test:snapshot -- -i --ci",
+    "env": "echo ${BUILD_VERSION}",
     "lint": "ng lint",
     "lint-fix": "ng lint --fix",
+    "lint-fix:style": "stylelint --fix src/**/*.{css,scss,sass}",
     "lint:style": "stylelint src/**/*.{css,scss,sass}",
-    "lint-fix:style": "stylelint --fix src/**/*.{css,scss,sass}"
+    "ng": "ng",
+    "start": "ng cache clean && ng serve --configuration local --hmr",
+    "start:remote": "ng serve --configuration development --hmr",
+    "test": "jest",
+    "test:all": "npm run test:unit && npm run test:snapshot",
+    "test:ci": "npm run test:unit -- -i --ci && npm run test:snapshot -- -i --ci",
+    "test:snapshot": "jest --coverage=false -c jest.config.snap.js",
+    "test:snapshot.update": "jest --coverage=false -c jest.config.snap.js -u",
+    "test:unit": "jest --coverage",
+    "watch": "ng cache clean && ng build --watch --configuration development"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^16.2.0",
     "@angular/common": "^16.2.0",
@@ -60,5 +59,6 @@
     "prettier": "^3.0.3",
     "prettier-eslint": "^15.0.1",
     "typescript": "^5.2.2"
-  }
+  },
+  "private": true
 }

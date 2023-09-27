@@ -2,20 +2,20 @@
   "name": "mache-viewer-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
-  "scripts": {
-    "test": "jest",
-    "build": "rimraf dist && esbuild ./src/app.ts --bundle --minify --sourcemap --platform=node --target=node18.18 --outdir=dist"
-  },
   "keywords": [
     "mache.tv"
   ],
-  "author": "taigacat",
-  "license": "MIT",
+  "homepage": "https://github.com/taigacat/mache-viewer#readme",
   "bugs": {
     "url": "https://github.com/taigacat/mache-viewer/issues"
   },
-  "homepage": "https://github.com/taigacat/mache-viewer#readme",
+  "license": "MIT",
+  "author": "taigacat",
+  "main": "app.js",
+  "scripts": {
+    "build": "rimraf dist && esbuild ./src/app.ts --bundle --minify --sourcemap --platform=node --target=node18.18 --outdir=dist",
+    "test": "jest"
+  },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^1.13.1",
     "@middy/core": "^4.6.4",
