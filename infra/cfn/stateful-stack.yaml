@@ -1,0 +1,221 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Stateful stack"
+
+Parameters:
+  ServiceName:
+    Type: String
+    Description: Service name
+    Default: mache-viewer
+  Phase:
+    Type: String
+    Description: Phase
+    AllowedValues:
+      - ci
+      - dev
+      - prd
+  S3KeyCode:
+    Type: String
+    Description: S3 key code artifact
+
+Resources:
+  S3BucketWeb:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub ${ServiceName}-cmn-web
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+  S3BucketMdl:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub ${ServiceName}-cmd-mdl
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref S3BucketWeb
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub arn:${AWS::Partition}:s3:::${S3BucketWeb}/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+          - Action: s3:ListBucket
+            Effect: Allow
+            Resource: !Sub arn:${AWS::Partition}:s3:::${S3BucketWeb}
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        PriceClass: PriceClass_100
+        DefaultCacheBehavior:
+          TargetOriginId: S3BucketWeb
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: 'none'
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
+          Compress: true
+        DefaultRootObject: index.html
+        Origins:
+          - Id: S3BucketWeb
+            DomainName: !GetAtt S3BucketWeb.DomainName
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+            S3OriginConfig:
+              OriginAccessIdentity: ''
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
+          - Id: APIGateway
+            DomainName: !Sub '${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+            OriginPath: /api
+            OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
+            CachePolicyId: !Ref CloudFrontCachePolicyAPI
+
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: !Sub 'OAC of ${S3BucketWeb}. Created by ${AWS::StackName}'
+        Name: !Sub ${S3BucketWeb}-OAC
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontCachePolicyAPI:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Name: "StatefulCachePolicy"
+        DefaultTTL: 3600
+        MaxTTL: 86300
+        MinTTL: 60
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingBrotli: true
+          EnableAcceptEncodingGzip: true
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: all
+
+  DynamoDbTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${ServiceName}-${Phase}-object-table
+      AttributeDefinitions:
+          - AttributeName: hashKey
+            AttributeType: S
+          - AttributeName: rangeKey
+            AttributeType: S
+          - AttributeName: ttl
+            AttributeType: N
+      KeySchema:
+          - AttributeName: hashKey
+            KeyType: HASH
+          - AttributeName: rangeKey
+            KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      BillingMode: PAY_PER_REQUEST
+
+  APIGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub ${ServiceName}-${Phase}-api
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      # TODO OpenAPI specification location
+
+  APIGatewayResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref APIGateway
+      ParentId: !GetAtt APIGateway.RootResourceId
+      PathPart: api
+
+  APIGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: APIGatewayResource
+    Properties:
+      RestApiId: !Ref APIGateway
+      StageName: !Ref Phase
+
+  APIGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    DependsOn: APIGatewayDeployment
+    Properties:
+      StageName: !Ref Phase
+      RestApiId: !Ref APIGateway
+      DeploymentId: !Ref APIGatewayDeployment
+
+  APIFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${ServiceName}-${Phase}-api
+      Runtime: nodejs18.x
+      Code:
+        S3Bucket: !Sub ${ServiceName}-cmd-mdl
+        S3Key: !Ref S3KeyCode
+      Handler: app.handler
+      Environment:
+        Variables:
+      Architectures:
+        - arm64
+      MemorySize: 128
+      Timeout: 29
+      Role: !GetAtt APIFunctionRole.Arn
+
+  APIFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      RoleName: !Sub ${ServiceName}-${Phase}-lambda
+      Policies:
+        - PolicyName: !Sub ${ServiceName}-${Phase}-logs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}-${Phase}-api:*
