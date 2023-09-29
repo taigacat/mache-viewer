@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description:
+Description: "Deployment stack"
+
 Parameters:
   ServiceName:
     Type: String
@@ -15,6 +16,7 @@ Parameters:
   APIFunctionV1:
     Type: String
     Description: API function V1
+
 Resources:
   DummyServer:
     Type: AWS::EC2::Instance

@@ -20,24 +20,16 @@ Parameters:
     Type: String
     Description: S3 key code artifact
 
-Mappings:
-  BucketName:
-    cmn:
-      web: !Sub ${ServiceName}-cmn-web
-      mdl: !Sub ${ServiceName}-cmd-mdl
-
 Resources:
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !FindInMap [BucketName, cmn, web]
+      Bucket: !Sub ${ServiceName}-cmn-web
       PolicyDocument:
         Statement:
           - Action: s3:GetObject
             Effect: Allow
-            Resource: !Sub
-              - arn:${AWS::Partition}:s3:::${S3BucketWeb}/*
-              - S3BucketWeb: !FindInMap [BucketName, cmn, web]
+            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web/*
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
@@ -45,9 +37,7 @@ Resources:
                 AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
           - Action: s3:ListBucket
             Effect: Allow
-            Resource: !Sub
-              - arn:${AWS::Partition}:s3:::${S3BucketWeb}
-              - S3BucketWeb: !FindInMap [BucketName, cmn, web]
+            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
@@ -73,12 +63,7 @@ Resources:
         DefaultRootObject: index.html
         Origins:
           - Id: S3BucketWeb
-            DomainName: !Sub
-              - ${S3BucketWeb}.s3.amazonaws.com
-              - S3BucketWeb: !FindInMap [BucketName, cmn, web]
-            CustomOriginConfig:
-              HTTPSPort: 443
-              OriginProtocolPolicy: https-only
+            DomainName: !Sub ${ServiceName}-cmn-web.s3.amazonaws.com
             S3OriginConfig:
               OriginAccessIdentity: ''
             OriginAccessControlId: !GetAtt OriginAccessControl.Id
@@ -100,12 +85,8 @@ Resources:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Description: !Sub
-          - 'OAC of ${S3BucketWeb}. Created by ${AWS::StackName}'
-          - S3BucketWeb: !FindInMap [BucketName, cmn, web]
-        Name: !Sub
-          - ${S3BucketWeb}-OAC
-          - S3BucketWeb: !FindInMap [BucketName, cmn, web]
+        Description: !Sub 'OAC of ${ServiceName}-cmn-web. Created by ${AWS::StackName}'
+        Name: !Sub ${ServiceName}-cmn-web-OAC
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -128,7 +109,7 @@ Resources:
           QueryStringsConfig:
             QueryStringBehavior: all
 
-  DynamoDbTable:
+  DynamoDbObjectTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Sub ${ServiceName}-${Phase}-object-table
@@ -137,8 +118,6 @@ Resources:
           AttributeType: S
         - AttributeName: rangeKey
           AttributeType: S
-        - AttributeName: ttl
-          AttributeType: N
       KeySchema:
         - AttributeName: hashKey
           KeyType: HASH
@@ -162,7 +141,7 @@ Resources:
         Types:
           - REGIONAL
       BodyS3Location:
-        Bucket: !FindInMap [BucketName, cmn, mdl]
+        Bucket: !Sub ${ServiceName}-cmd-mdl
         Key: !Ref S3KeyOpenApi
       Tags:
         - Key: Service
@@ -208,6 +187,7 @@ Resources:
       Handler: app.handler
       Environment:
         Variables:
+          OBJECT_TABLE: !Ref DynamoDbObjectTable
       Architectures:
         - arm64
       MemorySize: 128
@@ -264,9 +244,9 @@ Outputs:
     CloudFrontDistribution:
         Description: CloudFront distribution
         Value: !Ref CloudFrontDistribution
-    DynamoDbTable:
-        Description: DynamoDB table
-        Value: !Ref DynamoDbTable
+    DynamoDbObjectTable:
+        Description: DynamoDB object table
+        Value: !Ref DynamoDbObjectTable
     APIGateway:
         Description: API Gateway
         Value: !Ref APIGateway
