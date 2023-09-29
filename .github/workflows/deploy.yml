@@ -42,27 +42,8 @@ env:
   ServiceName: mache-viewer
 
 jobs:
-  update-common-stack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ${{inputs.region}}
-      - name: Deploy cloudformation stack
-        uses: aws-actions/aws-cloudformation-github-deploy@v1
-        with:
-          name: ${{env.ServiceName}}-common
-          template: infra/cfn/common-stack.yaml
-          no-fail-on-empty-changeset: true
-          parameter-overrides: |
-            ServiceName=${{env.ServiceName}}
 
   update-stateful-stack:
-    needs:
-      - update-common-stack
     runs-on: ubuntu-latest
     outputs:
       APIFunctionV1: ${{ steps.stack.outputs.APIFunctionV1Name }}

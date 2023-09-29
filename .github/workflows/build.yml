@@ -7,6 +7,9 @@ on:
         description: 'Build version (yyyyMMddHHmmss)'
         value: ${{ jobs.version.outputs.build_version }}
 
+env:
+  ServiceName: mache-viewer
+
 jobs:
   version:
     runs-on: ubuntu-latest
@@ -15,9 +18,28 @@ jobs:
     steps:
       - run: echo "build_version=$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
 
+  update-common-stack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          aws-region: ap-northeast-1
+      - name: Deploy cloudformation stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-common
+          template: infra/cfn/common-stack.yaml
+          no-fail-on-empty-changeset: true
+          parameter-overrides: |
+            ServiceName=${{env.ServiceName}}
+
   build-backend:
     needs:
       - version
+      - update-common-stack
     runs-on: ubuntu-latest
     defaults:
       run:
