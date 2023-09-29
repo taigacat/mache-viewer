@@ -21,29 +21,10 @@ Parameters:
     Description: S3 key code artifact
 
 Resources:
-  S3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Sub ${ServiceName}-cmn-web
-      PolicyDocument:
-        Statement:
-          - Action: s3:GetObject
-            Effect: Allow
-            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web/*
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
-          - Action: s3:ListBucket
-            Effect: Allow
-            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
 
+  #############################
+  # CloudFront
+  #############################
   CloudFrontDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
@@ -85,16 +66,6 @@ Resources:
         - Key: Phase
           Value: !Ref Phase
 
-  OriginAccessControl:
-    Type: AWS::CloudFront::OriginAccessControl
-    Properties:
-      OriginAccessControlConfig:
-        Description: !Sub 'OAC of ${ServiceName}-cmn-web. Created by ${AWS::StackName}'
-        Name: !Sub ${ServiceName}-cmn-web-OAC
-        OriginAccessControlOriginType: s3
-        SigningBehavior: always
-        SigningProtocol: sigv4
-
   CloudFrontCachePolicyAPI:
     Type: AWS::CloudFront::CachePolicy
     Properties:
@@ -113,6 +84,42 @@ Resources:
           QueryStringsConfig:
             QueryStringBehavior: all
 
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Description: !Sub 'OAC of ${ServiceName}-cmn-web. Created by ${AWS::StackName}'
+        Name: !Sub ${ServiceName}-cmn-web-OAC
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  S3BucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Sub ${ServiceName}-cmn-web
+      PolicyDocument:
+        Statement:
+          - Action: s3:GetObject
+            Effect: Allow
+            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+          - Action: s3:ListBucket
+            Effect: Allow
+            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  #############################
+  # DynamoDB
+  #############################
   DynamoDbObjectTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -137,6 +144,9 @@ Resources:
         - Key: Phase
           Value: !Ref Phase
 
+  #############################
+  # API Gateway
+  #############################
   APIGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
@@ -153,19 +163,11 @@ Resources:
         - Key: Phase
           Value: !Ref Phase
 
-  APIGatewayResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref APIGateway
-      ParentId: !GetAtt APIGateway.RootResourceId
-      PathPart: api
-
   APIGatewayDeploymentV1:
     Type: AWS::ApiGateway::Deployment
-    DependsOn: APIGatewayResource
     Properties:
       RestApiId: !Ref APIGateway
-      StageName: v1
+      StageName: api
 
   APIGatewayStage:
     Type: AWS::ApiGateway::Stage
@@ -179,6 +181,9 @@ Resources:
         - Key: Phase
           Value: !Ref Phase
 
+  #############################
+  # Lambda
+  #############################
   APIFunctionV1:
     Type: AWS::Lambda::Function
     DependsOn: APIFunctionV1LogGroup
