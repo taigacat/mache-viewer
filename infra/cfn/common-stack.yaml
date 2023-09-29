@@ -25,7 +25,7 @@ Resources:
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
-      BucketName: !Sub ${ServiceName}-cmd-mdl
+      BucketName: !Sub ${ServiceName}-cmn-mdl
       PublicAccessBlockConfiguration:
         BlockPublicAcls: True
         BlockPublicPolicy: True
