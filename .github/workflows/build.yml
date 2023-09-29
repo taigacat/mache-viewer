@@ -15,9 +15,11 @@ jobs:
     needs:
       - version
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - uses: actions/checkout@v2
-      - run: cd backend
       - uses: actions/setup-node@v2
         with:
           node-version: 18
