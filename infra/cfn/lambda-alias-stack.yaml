@@ -8,7 +8,7 @@ Parameters:
   APIFunctionV1:
     Type: String
     Description: API function V1
-  APIFunctionV1VersionNum:
+  APIFunctionV1Version:
     Type: String
     Description: API function V1 version number
 
@@ -17,10 +17,10 @@ Resources:
     Type: AWS::Lambda::Alias
     Properties:
       FunctionName: !Ref APIFunctionV1
-      FunctionVersion: !Ref APIFunctionV1VersionNum
+      FunctionVersion: !Ref APIFunctionV1Version
       Name: !Ref AliasName
       Description: !Sub ${AliasName} alias
       RoutingConfig:
         AdditionalVersionWeights:
-          - FunctionVersion: !Ref APIFunctionV1VersionNum
+          - FunctionVersion: !Ref APIFunctionV1Version
             FunctionWeight: 1

@@ -3,6 +3,10 @@ name: Check
 on:
   workflow_dispatch:
     parameters:
+      region:
+        description: Region
+        required: true
+        default: ap-northeast-1
       phase:
         description: Phase
         required: true
@@ -12,6 +16,10 @@ on:
         required: true
   workflow_call:
     parameters:
+      region:
+        description: Region
+        required: true
+        default: ap-northeast-1
       phase:
         description: Phase
         required: true
@@ -32,11 +40,11 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ap-northeast-1
+          aws-region: ${{inputs.region}}
       - name: Deploy cloudformation stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{env.ServiceName}}-common-stack
+          name: ${{env.ServiceName}}-common
           template: infra/cfn/common-stack.yaml
           no-fail-on-empty-changeset: true
           parameter-overrides: |
@@ -46,23 +54,71 @@ jobs:
     needs:
       - update-common-stack
     runs-on: ubuntu-latest
+    outputs:
+      APIFunctionV1: ${{ steps.stack.outputs.APIFunctionV1Name }}
     steps:
       - uses: actions/checkout@v2
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ap-northeast-1
+          aws-region: ${{inputs.region}}
       - name: Upload OpenAPI specification to S3
         run: aws s3 cp infra/swagger-v1.yaml s3://${{env.ServiceName}}-cmn-mdl/build/${{inputs.build_version}}/infra/swagger-v1.yaml
-      - name: Deploy cloudformation stack
+      - id: stack
+        name: Deploy cloudformation stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{env.ServiceName}}-${{inputs.phase}}-stateful-stack
+          name: ${{env.ServiceName}}-${{inputs.phase}}-stateful
           template: infra/cfn/stateful-stack.yaml
           no-fail-on-empty-changeset: true
           parameter-overrides: |
-              ServiceName=${{env.ServiceName}}
-              Phase=${{inputs.phase}}
-              S3KeyOpenApi=build/${{inputs.build_version}}/infra/swagger-v1.yaml
-              S3KeyCode=build/${{inputs.build_version}}/backend/function.zip
+            ServiceName=${{env.ServiceName}}
+            Phase=${{inputs.phase}}
+            S3KeyOpenApi=build/${{inputs.build_version}}/infra/swagger-v1.yaml
+            S3KeyCode=build/${{inputs.build_version}}/backend/function.zip
+
+  create-stateless-stack:
+    needs:
+      - update-stateful-stack
+    runs-on: ubuntu-latest
+    outputs:
+      APIFunctionV1Version: ${{ steps.stack.outputs.APIFunctionV1Version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          aws-region: ${{inputs.region}}
+      - id: stack
+        name: Deploy cloudformation stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-stateless-${{inputs.build_version}}
+          template: infra/cfn/common-stack.yaml
+          no-fail-on-empty-changeset: true
+          parameter-overrides: |
+            APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}}
+
+  blue-green-deploy:
+    needs:
+      - create-stateless-stack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          aws-region: ${{inputs.region}}
+      - name: Deploy cloudformation stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-blue-green
+          template: infra/cfn/blue-green-deploy.yaml
+          no-fail-on-empty-changeset: true
+          parameter-overrides: |
+            AliasName=live
+            APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}}
+            APIFunctionV1Version=${{needs.create-stateless-stack.outputs.APIFunctionV1Version}}
