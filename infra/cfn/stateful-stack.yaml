@@ -13,44 +13,31 @@ Parameters:
       - ci
       - dev
       - prd
+  S3KeyOpenApi:
+    Type: String
+    Description: S3 key OpenAPI specification
   S3KeyCode:
     Type: String
     Description: S3 key code artifact
 
+Mappings:
+  BucketName:
+    cmn:
+      web: !Sub ${ServiceName}-cmn-web
+      mdl: !Sub ${ServiceName}-cmd-mdl
+
 Resources:
-  S3BucketWeb:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      BucketName: !Sub ${ServiceName}-cmn-web
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
-
-  S3BucketMdl:
-    Type: AWS::S3::Bucket
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
-    Properties:
-      BucketName: !Sub ${ServiceName}-cmd-mdl
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: True
-        BlockPublicPolicy: True
-        IgnorePublicAcls: True
-        RestrictPublicBuckets: True
-
   S3BucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref S3BucketWeb
+      Bucket: !FindInMap [BucketName, cmn, web]
       PolicyDocument:
         Statement:
           - Action: s3:GetObject
             Effect: Allow
-            Resource: !Sub arn:${AWS::Partition}:s3:::${S3BucketWeb}/*
+            Resource: !Sub
+              - arn:${AWS::Partition}:s3:::${S3BucketWeb}/*
+              - S3BucketWeb: !FindInMap [BucketName, cmn, web]
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
@@ -58,7 +45,9 @@ Resources:
                 AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
           - Action: s3:ListBucket
             Effect: Allow
-            Resource: !Sub arn:${AWS::Partition}:s3:::${S3BucketWeb}
+            Resource: !Sub
+              - arn:${AWS::Partition}:s3:::${S3BucketWeb}
+              - S3BucketWeb: !FindInMap [BucketName, cmn, web]
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
@@ -84,7 +73,9 @@ Resources:
         DefaultRootObject: index.html
         Origins:
           - Id: S3BucketWeb
-            DomainName: !GetAtt S3BucketWeb.DomainName
+            DomainName: !Sub
+              - ${S3BucketWeb}.s3.amazonaws.com
+              - S3BucketWeb: !FindInMap [BucketName, cmn, web]
             CustomOriginConfig:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
@@ -99,13 +90,22 @@ Resources:
             OriginPath: /api
             OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
             CachePolicyId: !Ref CloudFrontCachePolicyAPI
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
 
   OriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
-        Description: !Sub 'OAC of ${S3BucketWeb}. Created by ${AWS::StackName}'
-        Name: !Sub ${S3BucketWeb}-OAC
+        Description: !Sub
+          - 'OAC of ${S3BucketWeb}. Created by ${AWS::StackName}'
+          - S3BucketWeb: !FindInMap [BucketName, cmn, web]
+        Name: !Sub
+          - ${S3BucketWeb}-OAC
+          - S3BucketWeb: !FindInMap [BucketName, cmn, web]
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
@@ -133,21 +133,26 @@ Resources:
     Properties:
       TableName: !Sub ${ServiceName}-${Phase}-object-table
       AttributeDefinitions:
-          - AttributeName: hashKey
-            AttributeType: S
-          - AttributeName: rangeKey
-            AttributeType: S
-          - AttributeName: ttl
-            AttributeType: N
+        - AttributeName: hashKey
+          AttributeType: S
+        - AttributeName: rangeKey
+          AttributeType: S
+        - AttributeName: ttl
+          AttributeType: N
       KeySchema:
-          - AttributeName: hashKey
-            KeyType: HASH
-          - AttributeName: rangeKey
-            KeyType: RANGE
+        - AttributeName: hashKey
+          KeyType: HASH
+        - AttributeName: rangeKey
+          KeyType: RANGE
       TimeToLiveSpecification:
         AttributeName: ttl
         Enabled: true
       BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
 
   APIGateway:
     Type: AWS::ApiGateway::RestApi
@@ -156,7 +161,14 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
-      # TODO OpenAPI specification location
+      BodyS3Location:
+        Bucket: !FindInMap [BucketName, cmn, mdl]
+        Key: !Ref S3KeyOpenApi
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
 
   APIGatewayResource:
     Type: AWS::ApiGateway::Resource
@@ -165,22 +177,27 @@ Resources:
       ParentId: !GetAtt APIGateway.RootResourceId
       PathPart: api
 
-  APIGatewayDeployment:
+  APIGatewayDeploymentV1:
     Type: AWS::ApiGateway::Deployment
     DependsOn: APIGatewayResource
     Properties:
       RestApiId: !Ref APIGateway
-      StageName: !Ref Phase
+      StageName: v1
 
   APIGatewayStage:
     Type: AWS::ApiGateway::Stage
-    DependsOn: APIGatewayDeployment
+    DependsOn: APIGatewayDeploymentV1
     Properties:
       StageName: !Ref Phase
       RestApiId: !Ref APIGateway
-      DeploymentId: !Ref APIGatewayDeployment
+      DeploymentId: !Ref APIGatewayDeploymentV1
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
 
-  APIFunction:
+  APIFunctionV1:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub ${ServiceName}-${Phase}-api
@@ -194,8 +211,13 @@ Resources:
       Architectures:
         - arm64
       MemorySize: 128
-      Timeout: 29
+      Timeout: 30
       Role: !GetAtt APIFunctionRole.Arn
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
 
   APIFunctionRole:
     Type: AWS::IAM::Role
@@ -218,4 +240,36 @@ Resources:
                   - logs:CreateLogGroup
                   - logs:CreateLogStream
                   - logs:PutLogEvents
-                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}-${Phase}-api:*
+                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}-${Phase}-*:*
+        - PolicyName: !Sub ${ServiceName}-${Phase}-dynamodb
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ServiceName}-${Phase}-*
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
+
+Outputs:
+    CloudFrontDistribution:
+        Description: CloudFront distribution
+        Value: !Ref CloudFrontDistribution
+    DynamoDbTable:
+        Description: DynamoDB table
+        Value: !Ref DynamoDbTable
+    APIGateway:
+        Description: API Gateway
+        Value: !Ref APIGateway
+    APIFunctionV1:
+        Description: API Lambda function
+        Value: !Ref APIFunctionV1

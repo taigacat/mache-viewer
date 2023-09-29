@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description:
+
+Parameters:
+  ServiceName:
+    Type: String
+    Description: Service name
+    Default: mache-viewer
+
+Resources:
+  S3BucketWeb:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub ${ServiceName}-cmn-web
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+  S3BucketMdl:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BucketName: !Sub ${ServiceName}-cmd-mdl
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: True
+        BlockPublicPolicy: True
+        IgnorePublicAcls: True
+        RestrictPublicBuckets: True
+
+Outputs:
+    S3BucketWeb:
+      Description: S3 bucket for web content
+      Value: !Ref S3BucketWeb
+    S3BucketMdl:
+      Description: S3 bucket for model content
+      Value: !Ref S3BucketMdl
