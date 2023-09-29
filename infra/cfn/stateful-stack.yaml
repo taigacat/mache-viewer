@@ -50,16 +50,6 @@ Resources:
       DistributionConfig:
         Enabled: true
         PriceClass: PriceClass_100
-        DefaultCacheBehavior:
-          TargetOriginId: S3BucketWeb
-          ForwardedValues:
-            QueryString: false
-            Cookies:
-              Forward: 'none'
-          ViewerProtocolPolicy: redirect-to-https
-          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
-          OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
-          Compress: true
         DefaultRootObject: index.html
         Origins:
           - Id: S3BucketWeb
@@ -73,6 +63,22 @@ Resources:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
             OriginPath: /api
+        DefaultCacheBehavior:
+          TargetOriginId: S3BucketWeb
+          ForwardedValues:
+            QueryString: false
+            Cookies:
+              Forward: 'none'
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
+          OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
+          Compress: true
+        CacheBehaviors:
+          - PathPattern: "/api/*"
+            TargetOriginId: APIGateway
+            OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
+            CachePolicyId: !Ref CloudFrontCachePolicyAPI
+            ViewerProtocolPolicy: "redirect-to-https"
       Tags:
         - Key: Service
           Value: !Sub ${ServiceName}
