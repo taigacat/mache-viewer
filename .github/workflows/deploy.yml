@@ -38,10 +38,6 @@ on:
         description: Build version (yyyyMMddHHmmss)
         required: true
 
-permissions:
-  id-token: write
-  contents: read
-
 env:
   ServiceName: mache-viewer
 
