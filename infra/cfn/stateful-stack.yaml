@@ -68,13 +68,11 @@ Resources:
               OriginAccessIdentity: ''
             OriginAccessControlId: !GetAtt OriginAccessControl.Id
           - Id: APIGateway
-            DomainName: !Sub '${Api}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
+            DomainName: !Sub '${APIGateway}.execute-api.${AWS::Region}.${AWS::URLSuffix}'
             CustomOriginConfig:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
             OriginPath: /api
-            OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
-            CachePolicyId: !Ref CloudFrontCachePolicyAPI
       Tags:
         - Key: Service
           Value: !Sub ${ServiceName}
