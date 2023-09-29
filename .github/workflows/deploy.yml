@@ -2,29 +2,39 @@ name: Deploy
 
 on:
   workflow_dispatch:
-    parameters:
+    inputs:
       region:
+        type: string
         description: Region
         required: true
         default: ap-northeast-1
       phase:
+        type: choice
+        options:
+          - ci
+          - dev
+          - prd
         description: Phase
         required: true
         default: ci
       build_version:
+        type: string
         description: Build version (yyyyMMddHHmmss)
         required: true
   workflow_call:
-    parameters:
+    inputs:
       region:
+        type: string
         description: Region
         required: true
         default: ap-northeast-1
       phase:
+        type: string
         description: Phase
         required: true
         default: ci
       build_version:
+        type: string
         description: Build version (yyyyMMddHHmmss)
         required: true
 
