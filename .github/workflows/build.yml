@@ -3,7 +3,9 @@ name: Build
 on:
   workflow_call:
     outputs:
-      build_version: ${{ jobs.version.outputs.build_version }}
+      build_version:
+        description: 'Build version (yyyyMMddHHmmss)'
+        value: ${{ jobs.version.outputs.build_version }}
 
 jobs:
   version:
