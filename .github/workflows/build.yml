@@ -25,7 +25,9 @@ jobs:
           node-version: 18
           cache: npm
       - name: Install backend dependencies
-        run: npm ci
+        run: |
+          ls -lha
+          npm ci
       - name: Build backend
         run: npm run build
       - name: Zip backend
