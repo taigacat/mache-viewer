@@ -1,0 +1,24 @@
+name: Main Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  check-infra:
+    uses: ./.github/workflows/check-infra.yml
+    secrets: inherit
+
+  build:
+    needs: [ check-infra ]
+    uses: ./.github/workflows/build.yml
+    secrets: inherit
+
+  deploy:
+    needs: [ build ]
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      phase: ci
+      build_version: ${{needs.build.outputs.build_version}}

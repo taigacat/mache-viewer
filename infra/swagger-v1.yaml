@@ -1,0 +1,359 @@
+openapi: 3.0.0
+
+info:
+  title: mache-viewer-api
+  version: 1.0.0
+
+servers:
+  - url: https://mache-viewer.4mo.co/api/v1
+    description: Production server
+  - url: https://mache-viewer-dev.4mo.co/api/v1
+    description: Development server
+
+x-amazon-apigateway-request-validators:
+  all:
+    validateRequestBody: true
+    validateRequestParameters: true
+
+x-amazon-apigateway-request-validator: all
+
+paths:
+  /broadcasters:
+    get:
+      summary: Get all broadcasters
+      description: Get all broadcasters
+      tags:
+        - broadcasters
+      parameters:
+        - in: query
+          name: name
+          schema:
+            type: string
+        - in: query
+          name: next_token
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_token:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/broadcaster'
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+
+  /broadcasters/${broadcaster_id}:
+    get:
+      summary: Get broadcaster
+      description: Get broadcaster
+      tags:
+        - broadcasters
+      parameters:
+        - in: path
+          name: broadcaster_id
+          schema:
+            $ref: '#/components/schemas/broadcasterId'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/broadcaster'
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+
+  /streams:
+    get:
+      summary: Get all streams
+      description: Get all streams
+      tags:
+        - streams
+      parameters:
+        - in: query
+          name: broadcaster_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/broadcasterId'
+        - in: query
+          name: next_token
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_token:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/stream'
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+
+  /gifts:
+    get:
+      summary: Get all gifts
+      description: Get all gifts
+      tags:
+        - gifts
+      parameters:
+        - in: query
+          name: stream_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/streamId'
+        - in: query
+          name: next_token
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  next_token:
+                    type: string
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/gift'
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+
+    post:
+      summary: Post gift
+      description: Post gift
+      tags:
+        - gifts
+      requestBody:
+        description: Gift
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                broadcaster_id:
+                  $ref: '#/components/schemas/broadcasterId'
+                broadcaster_name:
+                  $ref: '#/components/schemas/broadcasterName'
+                stream_id:
+                  $ref: '#/components/schemas/streamId'
+                gifts:
+                  type: object
+                  properties:
+                    all:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          index:
+                            $ref: '#/components/schemas/giftIndex'
+                          name:
+                            $ref: '#/components/schemas/giftName'
+                          count:
+                            $ref: '#/components/schemas/giftCount'
+                          sender:
+                            $ref: '#/components/schemas/senderName'
+                    diff:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          index:
+                            $ref: '#/components/schemas/giftIndex'
+                          name:
+                            $ref: '#/components/schemas/giftName'
+                          count:
+                            $ref: '#/components/schemas/giftCount'
+                          sender:
+                            $ref: '#/components/schemas/senderName'
+                  required:
+                    - diff
+              required:
+                - broadcaster_id
+                - broadcaster_name
+                - stream_id
+                - gifts
+      responses:
+        '200':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/gift'
+      x-amazon-apigateway-integration:
+        httpMethod: "POST"
+        uri:
+          Fn::Sub: "arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}/invocations"
+        responses:
+          default:
+            statusCode: "200"
+        passthroughBehavior: "when_no_match"
+        contentHandling: "CONVERT_TO_TEXT"
+        type: "aws_proxy"
+
+components:
+  schemas:
+    ### Broadcaster ###
+    broadcaster:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/broadcasterId'
+        name:
+          $ref: '#/components/schemas/broadcasterName'
+        created_at:
+          $ref: '#/components/schemas/createdAt'
+        updated_at:
+          $ref: '#/components/schemas/updatedAt'
+      required:
+        - id
+        - name
+
+    broadcasterId:
+      type: string
+      description: Broadcaster ID
+      example: 1234567890
+
+    broadcasterName:
+      type: string
+      description: Broadcaster Name
+      example: Taro Yamada
+
+    ### Stream ###
+    stream:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/streamId'
+        broadcaster_id:
+          $ref: '#/components/schemas/broadcasterId'
+        broadcaster_name:
+          $ref: '#/components/schemas/broadcasterName'
+        created_at:
+          $ref: '#/components/schemas/createdAt'
+        updated_at:
+          $ref: '#/components/schemas/updatedAt'
+
+    streamId:
+      type: string
+      description: Stream ID (UUID)
+      example: 12345678-1234-1234-1234-123456789012
+
+    ### Gift ###
+    gift:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/giftId'
+        name:
+          $ref: '#/components/schemas/giftName'
+        count:
+          $ref: '#/components/schemas/giftCount'
+        index:
+          $ref: '#/components/schemas/giftIndex'
+        sender:
+          $ref: '#/components/schemas/senderName'
+        stream_id:
+          $ref: '#/components/schemas/streamId'
+        broadcaster_id:
+          $ref: '#/components/schemas/broadcasterId'
+        broadcaster_name:
+          $ref: '#/components/schemas/broadcasterName'
+        created_at:
+          $ref: '#/components/schemas/createdAt'
+        updated_at:
+          $ref: '#/components/schemas/updatedAt'
+      required:
+        - id
+        - name
+        - count
+        - stream_id
+        - broadcaster_id
+        - broadcaster_name
+
+    giftId:
+      type: string
+      description: Gift ID
+      example: 351
+
+    giftName:
+      type: string
+      description: Gift Name
+      example: ハート
+
+    giftCount:
+      type: integer
+      description: Gift Count
+      example: 10
+
+    giftIndex:
+      type: integer
+      description: Gift Index
+      example: 0
+
+    senderName:
+      type: string
+      description: Sender Name
+      example: Taro Yamada
+
+    ### Common ###
+    createdAt:
+      type: string
+      description: Created At
+      example: 2021-01-01T00:00:00.000Z
+
+    updatedAt:
+      type: string
+      description: Updated At
+      example: 2021-01-01T00:00:00.000Z

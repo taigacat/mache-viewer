@@ -1,0 +1,11 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  check-infra:
+    uses: ./.github/workflows/check-infra.yml
+    secrets: inherit

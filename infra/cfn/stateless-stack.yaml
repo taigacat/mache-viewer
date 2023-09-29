@@ -1,0 +1,18 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Stateless stack"
+
+Parameters:
+  APIFunctionV1:
+    Type: String
+    Description: API function V1
+
+Resources:
+  APIFunctionV1Version:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref APIFunctionV1
+
+Outputs:
+  APIFunctionV1Version:
+    Description: API function V1 version number
+    Value: !GetAtt APIFunctionV1Version.Version
