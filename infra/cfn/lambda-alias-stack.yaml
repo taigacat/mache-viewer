@@ -1,0 +1,26 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Lambda alias stack"
+
+Parameters:
+  AliasName:
+    Type: String
+    Description: Alias name
+  APIFunctionV1:
+    Type: String
+    Description: API function V1
+  APIFunctionV1VersionNum:
+    Type: String
+    Description: API function V1 version number
+
+Resources:
+  APIFunctionV1Alias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      FunctionName: !Ref APIFunctionV1
+      FunctionVersion: !Ref APIFunctionV1VersionNum
+      Name: !Ref AliasName
+      Description: !Sub ${AliasName} alias
+      RoutingConfig:
+        AdditionalVersionWeights:
+          - FunctionVersion: !Ref APIFunctionV1VersionNum
+            FunctionWeight: 1

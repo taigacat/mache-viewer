@@ -78,6 +78,7 @@ Resources:
             TargetOriginId: APIGateway
             OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
             CachePolicyId: !Ref CloudFrontCachePolicyAPI
+            ViewerProtocolPolicy: redirect-to-https
       Tags:
         - Key: Service
           Value: !Sub ${ServiceName}
