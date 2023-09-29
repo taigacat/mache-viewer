@@ -65,7 +65,7 @@ jobs:
           no-fail-on-empty-changeset: true
           parameter-overrides: |
             ServiceName=${{env.ServiceName}}
-            Phase=${{inputs.phase}}
+            Phase=${{ inputs.phase }}
             S3KeyOpenApi=build/${{inputs.build_version}}/infra/swagger-v1.yaml
             S3KeyCode=build/${{inputs.build_version}}/backend/function.zip
 

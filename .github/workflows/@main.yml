@@ -25,4 +25,4 @@ jobs:
     secrets: inherit
     with:
       phase: ci
-      build_version: ${{needs.build.outputs.build_version}}
+      build_version: ${{ needs.build.outputs.build_version }}
