@@ -24,10 +24,9 @@ jobs:
         with:
           node-version: 18
           cache: npm
+          cache-dependency-path: backend/package-lock.json
       - name: Install backend dependencies
-        run: |
-          ls -lha
-          npm ci
+        run: npm ci
       - name: Build backend
         run: npm run build
       - name: Zip backend
