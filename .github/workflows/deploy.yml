@@ -62,11 +62,11 @@ jobs:
         with:
           name: ${{env.ServiceName}}-${{inputs.phase}}-stateful
           template: infra/cfn/stateful-stack.yaml
-          no-fail-on-empty-changeset: true
+          no-fail-on-empty-changeset: "1"
           parameter-overrides: |
-            ServiceName=${{env.ServiceName}}
-            Phase=${{ inputs.phase }}
-            S3KeyOpenApi=build/${{inputs.build_version}}/infra/swagger-v1.yaml
+            ServiceName=${{env.ServiceName}},
+            Phase=${{ inputs.phase }},
+            S3KeyOpenApi=build/${{inputs.build_version}}/infra/swagger-v1.yaml,
             S3KeyCode=build/${{inputs.build_version}}/backend/function.zip
 
   create-stateless-stack:
@@ -88,7 +88,7 @@ jobs:
         with:
           name: ${{env.ServiceName}}-${{inputs.phase}}-stateless-${{inputs.build_version}}
           template: infra/cfn/common-stack.yaml
-          no-fail-on-empty-changeset: true
+          no-fail-on-empty-changeset: "1"
           parameter-overrides: |
             APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}}
 
@@ -108,8 +108,8 @@ jobs:
         with:
           name: ${{env.ServiceName}}-${{inputs.phase}}-blue-green
           template: infra/cfn/blue-green-deploy.yaml
-          no-fail-on-empty-changeset: true
+          no-fail-on-empty-changeset: "1"
           parameter-overrides: |
-            AliasName=live
-            APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}}
+            AliasName=live,
+            APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}},
             APIFunctionV1Version=${{needs.create-stateless-stack.outputs.APIFunctionV1Version}}
