@@ -168,7 +168,6 @@ Resources:
 
   APIGatewayStage:
     Type: AWS::ApiGateway::Stage
-    DependsOn: APIGatewayDeploymentV1
     Properties:
       StageName: !Ref Phase
       RestApiId: !Ref APIGateway

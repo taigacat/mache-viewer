@@ -2,20 +2,20 @@ AWSTemplateFormatVersion: "2010-09-09"
 Description: "Deployment stack"
 
 Parameters:
-  ServiceName:
-    Type: String
-    Description: Service name
-    Default: mache-viewer
-  Phase:
-    Type: String
-    Description: Phase
-    AllowedValues:
-      - ci
-      - dev
-      - prd
-  APIFunctionV1:
-    Type: String
-    Description: API function V1
+#  ServiceName:
+#    Type: String
+#    Description: Service name
+#    Default: mache-viewer
+#  Phase:
+#    Type: String
+#    Description: Phase
+#    AllowedValues:
+#      - ci
+#      - dev
+#      - prd
+#  APIFunctionV1:
+#    Type: String
+#    Description: API function V1
 
 Resources:
   DummyServer:
