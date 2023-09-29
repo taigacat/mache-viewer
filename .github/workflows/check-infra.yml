@@ -1,9 +1,7 @@
-name: Check
+name: Check infra
 
 on:
-  pull_request:
-    paths:
-      - 'infra/**'
+  workflow_call:
 
 jobs:
   cfn-lint:
