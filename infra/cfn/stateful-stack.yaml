@@ -155,7 +155,7 @@ Resources:
         Types:
           - REGIONAL
       BodyS3Location:
-        Bucket: !Sub ${ServiceName}-cmd-mdl
+        Bucket: !Sub ${ServiceName}-cmn-mdl
         Key: !Ref S3KeyOpenApi
       Tags:
         - Key: Service
@@ -191,7 +191,7 @@ Resources:
       FunctionName: !Sub ${ServiceName}-${Phase}-api
       Runtime: nodejs18.x
       Code:
-        S3Bucket: !Sub ${ServiceName}-cmd-mdl
+        S3Bucket: !Sub ${ServiceName}-cmn-mdl
         S3Key: !Ref S3KeyCode
       Handler: app.handler
       Environment:
