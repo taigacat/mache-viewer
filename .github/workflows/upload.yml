@@ -20,7 +20,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ap-northeast-1
       - name: Deploy cloudformation stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -29,7 +29,7 @@ jobs:
           template: infra/cfn/common-stack.yaml
           no-fail-on-empty-changeset: "1"
           parameter-overrides: |
-            ServiceName=${{env.ServiceName}}
+            ServiceName=${{ env.ServiceName }}
 
   upload-backend:
     needs:
@@ -43,12 +43,12 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
           aws-region: ap-northeast-1
       - name: Upload function.zip to S3
         run: |
           aws s3 cp dist/function.zip \
-            s3://${{env.ServiceName}}-cmn-mdl/build/${{needs.version.outputs.build_version}}/backend/function.zip
+            s3://${{ env.ServiceName }}-cmn-mdl/build/${{ inputs.build_version }}/backend/function.zip
 
   upload-frontend:
     needs:
@@ -67,4 +67,4 @@ jobs:
       - name: Upload build to S3
         run: |
           aws s3 sync dist/ \
-            s3://${{env.ServiceName}}-cmn-mdl/build/${{needs.version.outputs.build_version}}/frontend/
+            s3://${{ env.ServiceName }}-cmn-mdl/build/${{ inputs.build_version }}/frontend/
