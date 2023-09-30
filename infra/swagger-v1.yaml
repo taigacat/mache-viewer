@@ -24,6 +24,7 @@ paths:
       description: Get all broadcasters
       tags:
         - broadcasters
+      operationId: getBroadcasters
       parameters:
         - in: query
           name: name
@@ -56,6 +57,7 @@ paths:
       description: Get broadcaster
       tags:
         - broadcasters
+      operationId: getBroadcaster
       parameters:
         - in: path
           name: broadcaster_id
@@ -77,6 +79,7 @@ paths:
       description: Get all streams
       tags:
         - streams
+      operationId: getStreams
       parameters:
         - in: query
           name: broadcaster_id
@@ -110,6 +113,7 @@ paths:
       description: Get all gifts
       tags:
         - gifts
+      operationId: getGifts
       parameters:
         - in: query
           name: stream_id
@@ -142,6 +146,7 @@ paths:
       description: Post gift
       tags:
         - gifts
+      operationId: postGift
       requestBody:
         description: Gift
         required: true
