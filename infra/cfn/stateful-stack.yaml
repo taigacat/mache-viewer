@@ -163,23 +163,23 @@ Resources:
         - Key: Phase
           Value: !Ref Phase
 
-  APIGatewayDeploymentV1:
-    Type: AWS::ApiGateway::Deployment
-    Properties:
-      RestApiId: !Ref APIGateway
-      StageName: api
-
-  APIGatewayStage:
-    Type: AWS::ApiGateway::Stage
-    Properties:
-      StageName: !Ref Phase
-      RestApiId: !Ref APIGateway
-      DeploymentId: !Ref APIGatewayDeploymentV1
-      Tags:
-        - Key: Service
-          Value: !Sub ${ServiceName}
-        - Key: Phase
-          Value: !Ref Phase
+#  APIGatewayDeploymentV1:
+#    Type: AWS::ApiGateway::Deployment
+#    Properties:
+#      RestApiId: !Ref APIGateway
+#      StageName: api
+#
+#  APIGatewayStage:
+#    Type: AWS::ApiGateway::Stage
+#    Properties:
+#      StageName: !Ref Phase
+#      RestApiId: !Ref APIGateway
+#      DeploymentId: !Ref APIGatewayDeploymentV1
+#      Tags:
+#        - Key: Service
+#          Value: !Sub ${ServiceName}
+#        - Key: Phase
+#          Value: !Ref Phase
 
   #############################
   # Lambda
