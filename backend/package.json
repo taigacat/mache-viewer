@@ -14,7 +14,9 @@
   "main": "app.js",
   "scripts": {
     "build": "rimraf dist && esbuild ./src/app.ts --bundle --minify --sourcemap --platform=node --target=node18.18 --outdir=dist",
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint --ext .ts ./src",
+    "lint:fix": "eslint --ext .ts ./src --fix"
   },
   "dependencies": {
     "@aws-lambda-powertools/logger": "^1.13.1",

@@ -1,0 +1,57 @@
+name: Check
+
+on:
+  workflow_call:
+
+jobs:
+  cfn-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: scottbrenner/cfn-lint-action@v2
+      - name: Print the Cloud Formation Linter Version & run Linter.
+        run: |
+          shopt -s globstar
+          cfn-lint --version
+          cfn-lint -t infra/cfn/**/*.yaml
+
+  openapi-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: npx @stoplight/spectral-cli lint swagger-v1.yaml
+        working-directory: infra
+
+  backend-eslint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend dependencies
+        run: npm ci
+      - name: Install backend dependencies
+        run: npm run lint
+
+  frontend-eslint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install backend dependencies
+        run: npm ci
+      - name: Install backend dependencies
+        run: npm run lint

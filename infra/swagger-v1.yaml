@@ -2,7 +2,11 @@ openapi: 3.0.0
 
 info:
   title: mache-viewer-api
+  description: API for mache-viewer
   version: 1.0.0
+  contact:
+    name: taigacat
+    url: https://github.com/taigacat
 
 servers:
   - url: https://mache-viewer.4mo.co/api/v1
@@ -59,6 +63,7 @@ paths:
       parameters:
         - in: path
           name: broadcaster_id
+          required: true
           schema:
             $ref: '#/components/schemas/broadcasterId'
       responses:
@@ -206,7 +211,7 @@ components:
   x-amazon-apigateway-integrations:
     APIFunction:
       uri:
-        Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}/invocations
+        Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
       passthroughBehavior: when_no_match
       httpMethod: POST
       type: aws_proxy
@@ -231,7 +236,7 @@ components:
     broadcasterId:
       type: string
       description: Broadcaster ID
-      example: 1234567890
+      example: '1234567890'
 
     broadcasterName:
       type: string
@@ -293,7 +298,7 @@ components:
     giftId:
       type: string
       description: Gift ID
-      example: 351
+      example: '351'
 
     giftName:
       type: string
