@@ -1,0 +1,45 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "DynamoDB stack"
+
+Parameters:
+  ServiceName:
+    Type: String
+    Description: Service name
+    Default: mache-viewer
+  Phase:
+    Type: String
+    Description: Phase
+    AllowedValues:
+      - ci
+      - dev
+      - prd
+
+Resources:
+  DynamoDbObjectTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${ServiceName}-${Phase}-object-table
+      AttributeDefinitions:
+        - AttributeName: hashKey
+          AttributeType: S
+        - AttributeName: rangeKey
+          AttributeType: S
+      KeySchema:
+        - AttributeName: hashKey
+          KeyType: HASH
+        - AttributeName: rangeKey
+          KeyType: RANGE
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
+
+Outputs:
+  DynamoDbObjectTable:
+    Description: DynamoDB object table
+    Value: !Ref DynamoDbObjectTable

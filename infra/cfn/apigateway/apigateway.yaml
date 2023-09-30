@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "API Gateway"
+
+Parameters:
+  ServiceName:
+    Type: String
+    Description: Service name
+    Default: mache-viewer
+  Phase:
+    Type: String
+    Description: Phase
+    AllowedValues:
+      - ci
+      - dev
+      - prd
+  S3KeyOpenApi:
+    Type: String
+    Description: S3 key OpenAPI specification
+
+Resources:
+  APIGateway:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub ${ServiceName}-${Phase}-api
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      BodyS3Location:
+        Bucket: !Sub ${ServiceName}-cmn-mdl
+        Key: !Ref S3KeyOpenApi
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
+
+Outputs:
+  APIGatewayId:
+    Description: API Gateway
+    Value: !Ref APIGateway

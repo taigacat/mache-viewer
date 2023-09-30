@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - run: npx @stoplight/spectral-cli lint swagger-v1.yaml
+      - run: npx @stoplight/spectral-cli lint swagger.yaml
         working-directory: infra
 
   backend-eslint:

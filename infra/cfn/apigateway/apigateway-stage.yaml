@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "API Gateway stage"
+
+Parameters:
+  ServiceName:
+      Type: String
+      Description: Service name
+      Default: mache-viewer
+  Phase:
+    Type: String
+    Description: Phase
+    AllowedValues:
+      - ci
+      - dev
+      - prd
+  StageName:
+    Type: String
+    Description: Phase
+  APIGatewayId:
+    Type: String
+    Description: API Gateway
+  APIGatewayDeploymentId:
+    Type: String
+    Description: API Gateway deployment
+  APIFunctionVersion:
+    Type: String
+    Description: Alias name
+
+Resources:
+  APIGatewayStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      StageName: !Ref StageName
+      RestApiId: !Ref APIGatewayId
+      DeploymentId: !Ref APIGatewayDeploymentId
+      Variables:
+        APIFunctionVersion: !Ref APIFunctionVersion
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase

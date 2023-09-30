@@ -44,6 +44,15 @@ paths:
             Access-Control-Allow-Origin:
               schema:
                 type: string
+                example: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+                example: 'GET,POST,PUT,DELETE,OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+                example: 'Content-Type'
           content:
             application/json:
               schema:
@@ -59,7 +68,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
@@ -94,7 +103,6 @@ paths:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: when_no_match
 
   /broadcasters/{broadcaster_id}:
     get:
@@ -115,6 +123,15 @@ paths:
             Access-Control-Allow-Origin:
               schema:
                 type: string
+                example: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+                example: 'GET,POST,PUT,DELETE,OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+                example: 'Content-Type'
           content:
             application/json:
               schema:
@@ -123,7 +140,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
@@ -164,7 +181,6 @@ paths:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: when_no_match
 
   /streams:
     get:
@@ -189,6 +205,15 @@ paths:
             Access-Control-Allow-Origin:
               schema:
                 type: string
+                example: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+                example: 'GET,POST,PUT,DELETE,OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+                example: 'Content-Type'
           content:
             application/json:
               schema:
@@ -204,7 +229,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
@@ -239,7 +264,6 @@ paths:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: when_no_match
 
   /gifts:
     get:
@@ -264,6 +288,15 @@ paths:
             Access-Control-Allow-Origin:
               schema:
                 type: string
+                example: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+                example: 'GET,POST,PUT,DELETE,OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+                example: 'Content-Type'
           content:
             application/json:
               schema:
@@ -279,7 +312,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
@@ -347,6 +380,15 @@ paths:
             Access-Control-Allow-Origin:
               schema:
                 type: string
+                example: '*'
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+                example: 'GET,POST,PUT,DELETE,OPTIONS'
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+                example: 'Content-Type'
           content:
             application/json:
               schema:
@@ -355,7 +397,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
@@ -390,7 +432,6 @@ paths:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
-        passthroughBehavior: when_no_match
 
 components:
   schemas:

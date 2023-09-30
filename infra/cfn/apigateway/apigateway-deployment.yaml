@@ -1,0 +1,22 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "API Gateway deployment"
+
+Parameters:
+  APIGatewayId:
+    Type: String
+    Description: API Gateway
+  StageName:
+    Type: String
+    Description: Stage name
+
+Resources:
+  APIGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref APIGatewayId
+      StageName: !Ref StageName
+
+Outputs:
+  APIGatewayDeploymentId:
+    Description: API Gateway deployment
+    Value: !Ref APIGatewayDeployment

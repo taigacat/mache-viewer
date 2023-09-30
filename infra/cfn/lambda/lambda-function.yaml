@@ -1,0 +1,100 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Lambda function"
+
+Parameters:
+  ServiceName:
+    Type: String
+    Description: Service name
+    Default: mache-viewer
+  Phase:
+    Type: String
+    Description: Phase
+    AllowedValues:
+      - ci
+      - dev
+      - prd
+  S3KeyCode:
+    Type: String
+    Description: S3 key code artifact
+
+Resources:
+  APIFunction:
+    Type: AWS::Lambda::Function
+    DependsOn: APIFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${ServiceName}-${Phase}-api
+      Runtime: nodejs18.x
+      Code:
+        S3Bucket: !Sub ${ServiceName}-cmn-mdl
+        S3Key: !Ref S3KeyCode
+      Handler: app.handler
+      Environment:
+        Variables:
+          OBJECT_TABLE: !Sub ${ServiceName}-${Phase}-object-table
+      Architectures:
+        - arm64
+      MemorySize: 128
+      Timeout: 30
+      Role: !GetAtt APIFunctionRole.Arn
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
+
+  APIFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${ServiceName}-${Phase}-api
+      RetentionInDays: 7
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
+
+  APIFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      RoleName: !Sub ${ServiceName}-${Phase}-lambda
+      Policies:
+        - PolicyName: !Sub ${ServiceName}-${Phase}-logs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${ServiceName}-${Phase}-*:*
+        - PolicyName: !Sub ${ServiceName}-${Phase}-dynamodb
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:DeleteItem
+                  - dynamodb:GetItem
+                  - dynamodb:Scan
+                  - dynamodb:Query
+                  - dynamodb:UpdateItem
+                Resource: !Sub arn:${AWS::Partition}:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${ServiceName}-${Phase}-*
+      Tags:
+        - Key: Service
+          Value: !Sub ${ServiceName}
+        - Key: Phase
+          Value: !Ref Phase
+
+Outputs:
+  APIFunction:
+    Description: API Lambda function
+    Value: !Ref APIFunction

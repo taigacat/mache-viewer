@@ -1,26 +1,6 @@
 name: Deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      region:
-        type: string
-        description: Region
-        required: false
-        default: ap-northeast-1
-      phase:
-        type: choice
-        options:
-          - ci
-          - dev
-          - prd
-        description: Phase
-        required: true
-        default: ci
-      build_version:
-        type: string
-        description: Build version (yyyyMMddHHmmss)
-        required: true
   workflow_call:
     inputs:
       region:
@@ -42,11 +22,10 @@ env:
   ServiceName: mache-viewer
 
 jobs:
-
-  update-stateful-stack:
+  update-dynamodb:
     runs-on: ubuntu-latest
     outputs:
-      APIFunctionV1: ${{ steps.stack.outputs.APIFunctionV1Name }}
+      DynamoDbObjectTable: ${{ steps.dynamodb-stack.outputs.DynamoDbObjectTable }}
     steps:
       - uses: actions/checkout@v2
       - name: Configure AWS credentials
@@ -54,63 +33,191 @@ jobs:
         with:
           role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
           aws-region: ${{inputs.region}}
-      - name: Upload OpenAPI specification to S3
-        run: aws s3 cp infra/swagger-v1.yaml s3://${{env.ServiceName}}-cmn-mdl/build/${{inputs.build_version}}/infra/swagger-v1.yaml
-      - id: stack
-        name: Deploy cloudformation stack
+
+      ### DynamoDB ###
+      - name: Deploy cloudformation stack [dynamodb]
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{env.ServiceName}}-${{inputs.phase}}-stateful
-          template: infra/cfn/stateful-stack.yaml
+          name: ${{env.ServiceName}}-${{inputs.phase}}-dynamodb
+          template: infra/cfn/dynamodb/dynamodb.yaml
           no-fail-on-empty-changeset: "1"
-          capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: |
-            ServiceName=${{env.ServiceName}},
+            ServiceName=${{ env.ServiceName }},
+            Phase=${{ inputs.phase }}
+      - id: dynamodb-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-dynamodb \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
+
+  update-lambda:
+    runs-on: ubuntu-latest
+    outputs:
+      APIFunction: ${{ steps.lambda-function-stack.outputs.APIFunction }}
+      APIFunctionVersion: ${{ steps.lambda-version-stack.outputs.APIFunctionVersion }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          aws-region: ${{inputs.region}}
+
+      ### Lambda Function ###
+      - name: Deploy cloudformation stack [lambda function]
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-lambda
+          template: infra/cfn/lambda/lambda-function.yaml
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: |
+            ServiceName=${{ env.ServiceName }},
             Phase=${{ inputs.phase }},
-            S3KeyOpenApi=build/${{inputs.build_version}}/infra/swagger-v1.yaml,
             S3KeyCode=build/${{inputs.build_version}}/backend/function.zip
+      - id: lambda-function-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-lambda \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
 
-  create-stateless-stack:
-    needs:
-      - update-stateful-stack
-    runs-on: ubuntu-latest
-    outputs:
-      APIFunctionV1Version: ${{ steps.stack.outputs.APIFunctionV1Version }}
-    steps:
-      - uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ${{inputs.region}}
-      - id: stack
-        name: Deploy cloudformation stack
+      ### Lambda Version ###
+      - name: Deploy cloudformation stack [lambda version]
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{env.ServiceName}}-${{inputs.phase}}-stateless-${{inputs.build_version}}
-          template: infra/cfn/common-stack.yaml
+          name: ${{env.ServiceName}}-${{inputs.phase}}-lambda-version-${{inputs.build_version}}
+          template: infra/cfn/lambda/lambda-function.yaml
           no-fail-on-empty-changeset: "1"
           parameter-overrides: |
-            APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}}
+            APIFunction=${{steps.lambda-function-stack.outputs.APIFunction}}
+      - id: lambda-version-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-lambda-version-${{inputs.build_version}} \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
 
-  blue-green-deploy:
-    needs:
-      - create-stateless-stack
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ${{inputs.region}}
-      - name: Deploy cloudformation stack
+      ### Lambda Alias ###
+      - name: Deploy cloudformation stack [lambda alias]
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{env.ServiceName}}-${{inputs.phase}}-blue-green
-          template: infra/cfn/blue-green-deploy.yaml
+          name: ${{env.ServiceName}}-${{inputs.phase}}-lambda-alias-live
+          template: infra/cfn/lambda/lambda-alias.yaml
           no-fail-on-empty-changeset: "1"
           parameter-overrides: |
             AliasName=live,
-            APIFunctionV1=${{needs.update-stateful-stack.outputs.APIFunctionV1}},
-            APIFunctionV1Version=${{needs.create-stateless-stack.outputs.APIFunctionV1Version}}
+            APIFunction=${{needs.update-lambda.outputs.APIFunction}},
+            APIFunctionVersion=${{needs.create-lambda-version.outputs.APIFunctionVersion}}
+      - id: lambda-alias-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-lambda-alias-live \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
+
+  update-apigateway:
+    runs-on: ubuntu-latest
+    needs:
+      - update-dynamodb
+      - update-lambda
+    outputs:
+      APIGatewayId: ${{ steps.apigw-stack.outputs.APIGatewayId }}
+      APIGatewayDeploymentId: ${{ steps.apigw-deployment-stack.outputs.APIGatewayDeploymentId }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          aws-region: ${{inputs.region}}
+
+      ### API Gateway ###
+      - name: Deploy cloudformation stack [apigateway]
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-apigw
+          template: infra/cfn/apigateway/apigateway.yaml
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: |
+            ServiceName=${{ env.ServiceName }},
+            Phase=${{ inputs.phase }},
+            S3KeyOpenApi=build/${{ inputs.build_version }}/infra/swagger.yaml
+      - id: apigw-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-apigw \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
+
+      ### API Gateway Deployment ###
+      - name: Deploy cloudformation stack [apigateway deployment]
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-apigw-deployment-${{inputs.build_version}}
+          template: infra/cfn/apigateway/apigateway-deployment.yaml
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: |
+            APIGatewayId=${{ steps.apigw-stack.outputs.APIGatewayId }}
+            StageName=v1
+      - id: apigw-deployment-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-apigw-deployment-${{inputs.build_version}} \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
+
+      ### API Gateway Stage ###
+      - name: Deploy cloudformation stack [apigateway stage]
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-apigw-stage
+          template: infra/cfn/apigateway/apigateway-stage.yaml
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: |
+            ServiceName=${{ env.ServiceName }},
+            Phase=${{ inputs.phase }},
+            StageName=v1,
+            APIGatewayId=${{ steps.apigw-stack.outputs.APIGatewayId }},
+            APIGatewayDeploymentId=${{ steps.apigw-deployment-stack.outputs.APIGatewayDeploymentId }},
+            APIFunctionVersion=${{ needs.update-lambda.outputs.APIFunctionVersion }}
+      - id: apigw-stage-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-apigw-stage \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
+
+  update-cloudfront:
+    runs-on: ubuntu-latest
+    needs:
+      - update-apigateway
+    outputs:
+      CloudFrontDistributionId: ${{ steps.cloudfront-stack.outputs.CloudFrontDistributionId }}
+      CloudFrontDistributionDomainName: ${{ steps.cloudfront-stack.outputs.CloudFrontDistributionDomainName }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
+          aws-region: ${{inputs.region}}
+
+      ### Update CloudFront ###
+      - name: Deploy cloudformation stack [cloudfront]
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{env.ServiceName}}-${{inputs.phase}}-cloudfront
+          template: infra/cfn/cloudfront/cloudfront.yaml
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: |
+            ServiceName=${{ env.ServiceName }},
+            Phase=${{ inputs.phase }},
+            APIGatewayId=${{ needs.update-apigateway.outputs.APIGatewayId }}
+      - id: cloudfront-stack
+        run: |
+          aws cloudformation describe-stacks \
+            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-cloudfront \
+            | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
+            >> $GITHUB_OUTPUT
