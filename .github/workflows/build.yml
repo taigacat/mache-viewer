@@ -43,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ServiceName }}-backend-${{ needs.version.outputs.build_version }}
-          path: function.zip
+          path: backend/function.zip
           retention-days: 1
 
   build-frontend:
@@ -68,5 +68,5 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.ServiceName }}-frontend-${{ needs.version.outputs.build_version }}
-          path: dist
+          path: frontend/dist
           retention-days: 1
