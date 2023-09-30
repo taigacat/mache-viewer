@@ -5,9 +5,6 @@ Parameters:
   APIGatewayId:
     Type: String
     Description: API Gateway
-  StageName:
-    Type: String
-    Description: Stage name
 
 Resources:
   APIGatewayDeployment:
