@@ -165,7 +165,7 @@ jobs:
           template: infra/cfn/apigateway/apigateway-deployment.yaml
           no-fail-on-empty-changeset: "1"
           parameter-overrides: |
-            APIGatewayId=${{ steps.apigw-stack.outputs.APIGatewayId }}
+            APIGatewayId=${{ steps.apigw-stack.outputs.APIGatewayId }},
             StageName=v1
       - id: apigw-deployment-stack
         run: |
