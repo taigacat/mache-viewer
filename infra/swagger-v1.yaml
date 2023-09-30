@@ -56,7 +56,12 @@ paths:
                     items:
                       $ref: '#/components/schemas/broadcaster'
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
     options:
       tags:
         - CORS
@@ -76,7 +81,17 @@ paths:
               schema:
                 type: string
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: when_no_match
 
   /broadcasters/{broadcaster_id}:
     get:
@@ -102,7 +117,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/broadcaster'
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
     options:
       tags:
         - CORS
@@ -128,7 +148,17 @@ paths:
               schema:
                 type: string
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: when_no_match
 
   /streams:
     get:
@@ -165,7 +195,12 @@ paths:
                     items:
                       $ref: '#/components/schemas/stream'
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
     options:
       tags:
         - CORS
@@ -185,7 +220,17 @@ paths:
               schema:
                 type: string
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: when_no_match
 
   /gifts:
     get:
@@ -222,7 +267,12 @@ paths:
                     items:
                       $ref: '#/components/schemas/gift'
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
     post:
       summary: Post gift
       description: Post gift
@@ -290,7 +340,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/gift'
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+        type: aws_proxy
+        httpMethod: POST
+        uri:
+          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        passthroughBehavior: when_no_match
+        contentHandling: CONVERT_TO_TEXT
     options:
       tags:
         - CORS
@@ -310,32 +365,19 @@ paths:
               schema:
                 type: string
       x-amazon-apigateway-integration:
-        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
+        type: mock
+        requestTemplates:
+          application/json: '{"statusCode": 200}'
+        responses:
+          default:
+            statusCode: '200'
+            responseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'*'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+        passthroughBehavior: when_no_match
 
 components:
-  x-amazon-apigateway-integrations:
-    APIFunction:
-      type: aws_proxy
-      httpMethod: POST
-      uri:
-        Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
-      passthroughBehavior: when_no_match
-      contentHandling: CONVERT_TO_TEXT
-    CORS:
-      type: mock
-      requestTemplates:
-        application/json: '{"statusCode": 200}'
-      responses:
-        default:
-          statusCode: '200'
-          responseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'*'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-      passthroughBehavior: when_no_match
-      uri:
-        Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CORS.Arn}:live/invocations
-
   schemas:
     ### Broadcaster ###
     broadcaster:
