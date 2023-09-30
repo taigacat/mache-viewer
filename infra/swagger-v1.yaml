@@ -60,6 +60,9 @@ paths:
         httpMethod: POST
         uri:
           Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        responses:
+          default:
+            statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
     options:
@@ -121,6 +124,9 @@ paths:
         httpMethod: POST
         uri:
           Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        responses:
+          default:
+            statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
     options:
@@ -199,6 +205,9 @@ paths:
         httpMethod: POST
         uri:
           Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        responses:
+          default:
+            statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
     options:
@@ -271,6 +280,9 @@ paths:
         httpMethod: POST
         uri:
           Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        responses:
+          default:
+            statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
     post:
@@ -344,6 +356,9 @@ paths:
         httpMethod: POST
         uri:
           Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
+        responses:
+          default:
+            statusCode: "200"
         passthroughBehavior: when_no_match
         contentHandling: CONVERT_TO_TEXT
     options:
