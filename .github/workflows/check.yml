@@ -22,7 +22,7 @@ jobs:
       - run: npx @stoplight/spectral-cli lint swagger-v1.yaml
         working-directory: infra
 
-  backend-lint:
+  backend-eslint:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -39,7 +39,7 @@ jobs:
       - name: Install backend dependencies
         run: npm run lint
 
-  frontend-lint:
+  frontend-eslint:
     runs-on: ubuntu-latest
     defaults:
       run:
