@@ -134,6 +134,10 @@ jobs:
           aws-region: ${{inputs.region}}
 
       ### API Gateway ###
+      - name: Uplaod OpenAPI Specification
+        run: |
+          aws s3 cp infra/swagger.yaml \
+            s3://${{env.ServiceName}}-cmn-mdl/build/${{ inputs.build_version }}/infra/swagger.yaml
       - name: Deploy cloudformation stack [apigateway]
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
