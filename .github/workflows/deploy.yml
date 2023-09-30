@@ -71,6 +71,7 @@ jobs:
           name: ${{env.ServiceName}}-${{inputs.phase}}-lambda
           template: infra/cfn/lambda/lambda-function.yaml
           no-fail-on-empty-changeset: "1"
+          capabilities: CAPABILITY_NAMED_IAM
           parameter-overrides: |
             ServiceName=${{ env.ServiceName }},
             Phase=${{ inputs.phase }},
