@@ -19,28 +19,9 @@ jobs:
       - id: version
         run: echo "build_version=$(date +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
 
-  update-common-stack:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ap-northeast-1
-      - name: Deploy cloudformation stack
-        uses: aws-actions/aws-cloudformation-github-deploy@v1
-        with:
-          name: ${{env.ServiceName}}-common
-          template: infra/cfn/common-stack.yaml
-          no-fail-on-empty-changeset: "1"
-          parameter-overrides: |
-            ServiceName=${{env.ServiceName}}
-
   build-backend:
     needs:
       - version
-      - update-common-stack
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -58,20 +39,16 @@ jobs:
         run: npm run build
       - name: Zip backend
         run: zip -rj function.zip dist/*
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ap-northeast-1
-      - name: Upload function.zip to S3
-        run: |
-          aws s3 cp function.zip \
-            s3://${{env.ServiceName}}-cmn-mdl/build/${{needs.version.outputs.build_version}}/backend/function.zip
+          name: ${{ env.ServiceName }}-backend-${{ needs.version.outputs.build_version }}
+          path: function.zip
+          retention-days: 1
 
   build-frontend:
     needs:
       - version
-      - update-common-stack
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -87,12 +64,9 @@ jobs:
         run: npm ci
       - name: Build frontend
         run: npm run build
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
         with:
-          role-to-assume: ${{secrets.AWS_DEPLOY_ROLE_ARN}}
-          aws-region: ap-northeast-1
-      - name: Upload build to S3
-        run: |
-          aws s3 sync dist/ \
-            s3://${{env.ServiceName}}-cmn-mdl/build/${{needs.version.outputs.build_version}}/frontend/
+          name: ${{ env.ServiceName }}-frontend-${{ needs.version.outputs.build_version }}
+          path: dist
+          retention-days: 1

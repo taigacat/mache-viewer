@@ -20,3 +20,8 @@ Resources:
       FunctionVersion: !Ref APIFunctionVersion
       Name: !Ref AliasName
       Description: !Sub ${AliasName} alias
+
+Outputs:
+  APIFunctionAlias:
+    Description: API function alias
+    Value: !Ref APIFunctionAlias

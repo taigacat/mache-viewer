@@ -15,12 +15,20 @@ jobs:
     secrets: inherit
 
   build:
-    needs: [ check ]
     uses: ./.github/workflows/build.yml
     secrets: inherit
 
-  deploy:
+  upload:
     needs: [ build ]
+    uses: ./.github/workflows/upload.yml
+    secrets: inherit
+    with:
+      build_version: ${{ needs.build.outputs.build_version }}
+
+  deploy:
+    needs:
+      - build
+      - upload
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
