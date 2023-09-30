@@ -6,6 +6,6 @@ on:
       - main
 
 jobs:
-  check-:
+  check:
     uses: ./.github/workflows/check.yml
     secrets: inherit
