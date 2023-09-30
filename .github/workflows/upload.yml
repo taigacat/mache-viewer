@@ -50,7 +50,7 @@ jobs:
           aws s3 cp dist/function.zip \
             s3://${{env.ServiceName}}-cmn-mdl/build/${{needs.version.outputs.build_version}}/backend/function.zip
 
-  build-frontend:
+  upload-frontend:
     needs:
       - update-common-stack
     runs-on: ubuntu-latest
