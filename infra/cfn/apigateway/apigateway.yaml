@@ -32,7 +32,7 @@ Resources:
             Location: !Sub s3://${ServiceName}-cmn-mdl/${S3KeyOpenApi}
       Tags:
         - Key: Service
-          Value: !Sub ${ServiceName}
+          Value: !Ref ServiceName
         - Key: Phase
           Value: !Ref Phase
 

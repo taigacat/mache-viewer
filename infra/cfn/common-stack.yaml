@@ -19,6 +19,9 @@ Resources:
         BlockPublicPolicy: True
         IgnorePublicAcls: True
         RestrictPublicBuckets: True
+      Tags:
+        - Key: Service
+          Value: !Ref ServiceName
 
   S3BucketMdl:
     Type: AWS::S3::Bucket
@@ -31,6 +34,9 @@ Resources:
         BlockPublicPolicy: True
         IgnorePublicAcls: True
         RestrictPublicBuckets: True
+      Tags:
+        - Key: Service
+          Value: !Ref ServiceName
 
 Outputs:
     S3BucketWeb:

@@ -19,7 +19,9 @@ jobs:
     secrets: inherit
 
   upload:
-    needs: [ build ]
+    needs:
+      - check
+      - build
     uses: ./.github/workflows/upload.yml
     secrets: inherit
     with:

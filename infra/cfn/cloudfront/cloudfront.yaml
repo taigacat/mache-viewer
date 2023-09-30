@@ -57,7 +57,7 @@ Resources:
             ViewerProtocolPolicy: redirect-to-https
       Tags:
         - Key: Service
-          Value: !Sub ${ServiceName}
+          Value: !Ref ServiceName
         - Key: Phase
           Value: !Ref Phase
 

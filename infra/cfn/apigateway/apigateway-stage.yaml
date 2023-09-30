@@ -3,9 +3,9 @@ Description: "API Gateway stage"
 
 Parameters:
   ServiceName:
-      Type: String
-      Description: Service name
-      Default: mache-viewer
+    Type: String
+    Description: Service name
+    Default: mache-viewer
   Phase:
     Type: String
     Description: Phase
@@ -37,6 +37,11 @@ Resources:
         APIFunctionVersion: !Ref APIFunctionVersion
       Tags:
         - Key: Service
-          Value: !Sub ${ServiceName}
+          Value: !Ref ServiceName
         - Key: Phase
           Value: !Ref Phase
+
+Outputs:
+  APIGatewayStageId:
+    Description: API Gateway stage
+    Value: !Ref APIGatewayStage

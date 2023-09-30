@@ -125,7 +125,7 @@ jobs:
     outputs:
       APIGatewayId: ${{ steps.apigw-stack.outputs.APIGatewayId }}
       APIGatewayDeploymentId: ${{ steps.apigw-deployment-stack.outputs.APIGatewayDeploymentId }}
-
+      APIGatewayStageId: ${{ steps.apigw-stage-stack.outputs.APIGatewayStageId }}
     steps:
       - uses: actions/checkout@v2
       - name: Configure AWS credentials
