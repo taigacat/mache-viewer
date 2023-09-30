@@ -1,4 +1,4 @@
-openapi: 3.0.0
+openapi: 3.0.1
 
 info:
   title: mache-viewer-api
@@ -40,6 +40,10 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -53,8 +57,28 @@ paths:
                       $ref: '#/components/schemas/broadcaster'
       x-amazon-apigateway-integration:
         $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+    options:
+      tags:
+        - CORS
+      summary: CORS support
+      description: Enable CORS by returning correct headers
+      responses:
+        '200':
+          description: Default response
+          headers:
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
 
-  /broadcasters/${broadcaster_id}:
+  /broadcasters/{broadcaster_id}:
     get:
       summary: Get broadcaster
       description: Get broadcaster
@@ -69,12 +93,36 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/broadcaster'
       x-amazon-apigateway-integration:
         $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+    options:
+      tags:
+        - CORS
+      summary: CORS support
+      description: Enable CORS by returning correct headers
+      responses:
+        '200':
+          description: Default response
+          headers:
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
 
   /streams:
     get:
@@ -95,6 +143,10 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -108,6 +160,26 @@ paths:
                       $ref: '#/components/schemas/stream'
       x-amazon-apigateway-integration:
         $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+    options:
+      tags:
+        - CORS
+      summary: CORS support
+      description: Enable CORS by returning correct headers
+      responses:
+        '200':
+          description: Default response
+          headers:
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
 
   /gifts:
     get:
@@ -128,6 +200,10 @@ paths:
       responses:
         '200':
           description: OK
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
           content:
             application/json:
               schema:
@@ -141,7 +217,6 @@ paths:
                       $ref: '#/components/schemas/gift'
       x-amazon-apigateway-integration:
         $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
-
     post:
       summary: Post gift
       description: Post gift
@@ -200,21 +275,60 @@ paths:
       responses:
         '200':
           description: Created
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/gift'
       x-amazon-apigateway-integration:
         $ref: '#/components/x-amazon-apigateway-integrations/APIFunction'
+    options:
+      tags:
+        - CORS
+      summary: CORS support
+      description: Enable CORS by returning correct headers
+      responses:
+        '200':
+          description: Default response
+          headers:
+            Access-Control-Allow-Headers:
+              schema:
+                type: string
+            Access-Control-Allow-Methods:
+              schema:
+                type: string
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+      x-amazon-apigateway-integration:
+        $ref: '#/components/x-amazon-apigateway-integrations/CORS'
 
 components:
   x-amazon-apigateway-integrations:
     APIFunction:
+      type: aws_proxy
+      httpMethod: POST
       uri:
         Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${APIFunction.Arn}:live/invocations
       passthroughBehavior: when_no_match
-      httpMethod: POST
-      type: aws_proxy
+      contentHandling: CONVERT_TO_TEXT
+    CORS:
+      type: mock
+      requestTemplates:
+        application/json: '{"statusCode": 200}'
+      responses:
+        default:
+          statusCode: '200'
+          responseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'*'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+      passthroughBehavior: when_no_match
+      uri:
+        Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CORS.Arn}:live/invocations
 
   schemas:
     ### Broadcaster ###
