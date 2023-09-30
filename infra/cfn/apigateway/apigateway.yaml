@@ -25,9 +25,11 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
-      BodyS3Location:
-        Bucket: !Sub ${ServiceName}-cmn-mdl
-        Key: !Ref S3KeyOpenApi
+      Body:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: !Sub s3://${ServiceName}-cmn-mdl/${S3KeyOpenApi}
       Tags:
         - Key: Service
           Value: !Sub ${ServiceName}
