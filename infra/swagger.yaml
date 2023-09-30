@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 
 info:
   title: mache-viewer-api
@@ -68,11 +68,11 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
-        passthroughBehavior: when_no_match
+        passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
       tags:
@@ -140,11 +140,11 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
-        passthroughBehavior: when_no_match
+        passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
       tags:
@@ -229,11 +229,11 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
-        passthroughBehavior: when_no_match
+        passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
       tags:
@@ -312,11 +312,11 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
-        passthroughBehavior: when_no_match
+        passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     post:
       summary: Post gift
@@ -397,11 +397,11 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          Fn::Sub: arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
         responses:
           default:
             statusCode: "200"
-        passthroughBehavior: when_no_match
+        passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
       tags:
