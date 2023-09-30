@@ -108,6 +108,12 @@ paths:
         - CORS
       summary: CORS support
       description: Enable CORS by returning correct headers
+      parameters:
+        - in: path
+          name: broadcaster_id
+          required: true
+          schema:
+            $ref: '#/components/schemas/broadcasterId'
       responses:
         '200':
           description: Default response
@@ -444,3 +450,13 @@ components:
       type: string
       description: Updated At
       example: 2021-01-01T00:00:00.000Z
+
+tags:
+  - name: broadcasters
+    description: Broadcaster API
+  - name: streams
+    description: Stream API
+  - name: gifts
+    description: Gift API
+  - name: CORS
+    description: CORS support
