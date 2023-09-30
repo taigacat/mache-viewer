@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   check-infra:
-    uses: ./.github/workflows/check-infra.yml
+    uses: ./.github/workflows/check.yml
     secrets: inherit
 
   build:

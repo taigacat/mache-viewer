@@ -6,6 +6,6 @@ on:
       - main
 
 jobs:
-  check-infra:
-    uses: ./.github/workflows/check-infra.yml
+  check-:
+    uses: ./.github/workflows/check.yml
     secrets: inherit
