@@ -13,7 +13,7 @@ Parameters:
     Description: API function version number
 
 Resources:
-  APIFunctionV1Alias:
+  APIFunctionAlias:
     Type: AWS::Lambda::Alias
     Properties:
       FunctionName: !Ref APIFunction

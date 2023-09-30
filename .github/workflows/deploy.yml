@@ -87,11 +87,11 @@ jobs:
       - name: Deploy cloudformation stack [lambda version]
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{env.ServiceName}}-${{inputs.phase}}-lambda-version-${{inputs.build_version}}
+          name: ${{env.ServiceName}}-${{inputs.phase}}-lambda-version-${{ inputs.build_version }}
           template: infra/cfn/lambda/lambda-version.yaml
           no-fail-on-empty-changeset: "1"
           parameter-overrides: |
-            APIFunction=${{steps.lambda-function-stack.outputs.APIFunction}}
+            APIFunction=${{ steps.lambda-function-stack.outputs.APIFunction }}
       - id: lambda-version-stack
         run: |
           aws cloudformation describe-stacks \
@@ -108,8 +108,8 @@ jobs:
           no-fail-on-empty-changeset: "1"
           parameter-overrides: |
             AliasName=live,
-            APIFunction=${{needs.update-lambda.outputs.APIFunction}},
-            APIFunctionVersion=${{needs.create-lambda-version.outputs.APIFunctionVersion}}
+            APIFunction=${{ steps.lambda-function-stack.outputs.APIFunction }},
+            APIFunctionVersion=${{ steps.lambda-version-stack.outputs.APIFunctionVersion }}
       - id: lambda-alias-stack
         run: |
           aws cloudformation describe-stacks \

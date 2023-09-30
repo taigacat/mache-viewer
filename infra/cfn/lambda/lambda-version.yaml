@@ -14,5 +14,5 @@ Resources:
 
 Outputs:
   APIFunctionVersion:
-    Description: API function V1 version number
+    Description: API function version number
     Value: !GetAtt APIFunctionVersion.Version
