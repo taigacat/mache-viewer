@@ -9,9 +9,9 @@ info:
     url: https://github.com/taigacat
 
 servers:
-  - url: https://mache-viewer.4mo.co/api/v1
+  - url: https://mache-viewer.4mo.co/api
     description: Production server
-  - url: https://mache-viewer-dev.4mo.co/api/v1
+  - url: https://mache-viewer-dev.4mo.co/api
     description: Development server
 
 x-amazon-apigateway-request-validators:
@@ -22,7 +22,7 @@ x-amazon-apigateway-request-validators:
 x-amazon-apigateway-request-validator: all
 
 paths:
-  /broadcasters:
+  /v1/broadcasters:
     get:
       summary: Get all broadcasters
       description: Get all broadcasters
@@ -68,7 +68,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionAlias}/invocations
         passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
@@ -101,7 +101,7 @@ paths:
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
 
-  /broadcasters/{broadcaster_id}:
+  /v1/broadcasters/{broadcaster_id}:
     get:
       summary: Get broadcaster
       description: Get broadcaster
@@ -137,7 +137,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionAlias}/invocations
         passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
@@ -176,7 +176,7 @@ paths:
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
 
-  /streams:
+  /v1/streams:
     get:
       summary: Get all streams
       description: Get all streams
@@ -223,7 +223,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionAlias}/invocations
         passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
@@ -256,7 +256,7 @@ paths:
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
 
-  /gifts:
+  /v1/gifts:
     get:
       summary: Get all gifts
       description: Get all gifts
@@ -303,7 +303,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionAlias}/invocations
         passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     post:
@@ -385,7 +385,7 @@ paths:
         type: aws_proxy
         httpMethod: POST
         uri:
-          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionVersion}/invocations
+          'Fn::Sub': arn:${AWS::Partition}:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:mache-viewer-ci-api:${!stageVariables.APIFunctionAlias}/invocations
         passthroughBehavior: when_no_templates
         contentHandling: CONVERT_TO_TEXT
     options:
