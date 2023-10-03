@@ -1,5 +1,5 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import {logger} from "../logger";
+import { logger } from '../logger';
 
 export const GetBroadcastersHandler: APIGatewayProxyHandler = async (event) => {
   logger.debug(JSON.stringify(event));
