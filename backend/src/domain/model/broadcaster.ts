@@ -1,12 +1,30 @@
+import { Historical } from './historical';
+
 /**
  * Broadcaster model
  */
-export class Broadcaster {
-  id: string;
-  name: string;
+export class Broadcaster extends Historical {
+  /**
+   * Broadcaster id
+   */
+  _id: string;
+
+  /**
+   * Broadcaster name
+   */
+  _name: string;
 
   constructor(id: string, name: string) {
-    this.id = id;
-    this.name = name;
+    super();
+    this._id = id;
+    this._name = name;
+  }
+
+  get id() {
+    return this._id;
+  }
+
+  get name() {
+    return this._name;
   }
 }
