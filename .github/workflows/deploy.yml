@@ -53,6 +53,8 @@ jobs:
 
   update-blue:
     runs-on: ubuntu-latest
+    needs:
+      - update-dynamodb
     outputs:
       APIFunction: ${{ steps.lambda-function-stack.outputs.APIFunction }}
       APIFunctionVersion: ${{ steps.lambda-version-stack.outputs.APIFunctionVersion }}
@@ -212,7 +214,7 @@ jobs:
           parameter-overrides: |
             ServiceName=${{ env.ServiceName }},
             Phase=${{ inputs.phase }},
-            StageName=api,
+            StageName=live,
             APIGatewayId=${{ needs.update-blue.outputs.APIGatewayId }},
             APIGatewayDeploymentId=${{ needs.update-blue.outputs.APIGatewayDeploymentId }},
             APIFunctionAlias=green

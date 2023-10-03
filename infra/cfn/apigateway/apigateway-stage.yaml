@@ -16,6 +16,9 @@ Parameters:
   StageName:
     Type: String
     Description: Phase
+    AllowedValues:
+      - live
+      - test
   APIGatewayId:
     Type: String
     Description: API Gateway

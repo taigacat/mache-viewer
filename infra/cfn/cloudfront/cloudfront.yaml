@@ -38,7 +38,7 @@ Resources:
             CustomOriginConfig:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
-            OriginPath: /api
+            OriginPath: /live
         DefaultCacheBehavior:
           TargetOriginId: !Sub s3-${ServiceName}-cmn-web
           ForwardedValues:
@@ -50,7 +50,7 @@ Resources:
           OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
           Compress: true
         CacheBehaviors:
-          - PathPattern: "/api/*"
+          - PathPattern: "/v*"
             TargetOriginId: !Sub apigw-${ServiceName}-${Phase}-api
             OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
             CachePolicyId: !Ref CloudFrontCachePolicyAPI
