@@ -22,7 +22,7 @@ Parameters:
   APIGatewayDeploymentId:
     Type: String
     Description: API Gateway deployment
-  APIFunctionVersion:
+  APIFunctionAlias:
     Type: String
     Description: Alias name
 
@@ -34,7 +34,7 @@ Resources:
       RestApiId: !Ref APIGatewayId
       DeploymentId: !Ref APIGatewayDeploymentId
       Variables:
-        APIFunctionVersion: !Ref APIFunctionVersion
+        APIFunctionAlias: !Ref APIFunctionAlias
       Tags:
         - Key: Service
           Value: !Ref ServiceName
