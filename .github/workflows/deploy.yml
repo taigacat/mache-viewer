@@ -114,7 +114,8 @@ jobs:
             AliasName=blue,
             APIFunction=${{ steps.lambda-function-stack.outputs.APIFunction }},
             APIFunctionVersion=${{ steps.lambda-version-stack.outputs.APIFunctionVersion }}
-      - run: |
+      - id: lambda-alias-blue-stack
+        run: |
           aws cloudformation describe-stacks \
             --stack-name ${{ env.ServiceName }}-${{ inputs.phase }}-lambda-alias-blue \
             | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
@@ -172,7 +173,8 @@ jobs:
             StageName=test,
             APIGatewayId=${{ steps.apigw-stack.outputs.APIGatewayId }},
             APIGatewayDeploymentId=${{ steps.apigw-deployment-stack.outputs.APIGatewayDeploymentId }},
-            APIFunctionAlias=blue
+            APIFunctionAlias=blue,
+            APIFunctionAliasArn=${{ steps.lambda-alias-blue-stack.outputs.APIFunctionAlias }}
       - run: |
           aws cloudformation describe-stacks \
             --stack-name ${{env.ServiceName}}-${{inputs.phase}}-apigw-stage-blue \
@@ -200,7 +202,8 @@ jobs:
             AliasName=green,
             APIFunction=${{ needs.update-blue.outputs.APIFunction }},
             APIFunctionVersion=${{ needs.update-blue.outputs.APIFunctionVersion }}
-      - run: |
+      - id: lambda-alias-green-stack
+        run: |
           aws cloudformation describe-stacks \
             --stack-name ${{ env.ServiceName }}-${{ inputs.phase }}-lambda-alias-green \
             | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
@@ -217,7 +220,8 @@ jobs:
             StageName=live,
             APIGatewayId=${{ needs.update-blue.outputs.APIGatewayId }},
             APIGatewayDeploymentId=${{ needs.update-blue.outputs.APIGatewayDeploymentId }},
-            APIFunctionAlias=green
+            APIFunctionAlias=green,
+            APIFunctionAliasArn=${{ steps.lambda-alias-green-stack.outputs.APIFunctionAlias }}
       - run: |
           aws cloudformation describe-stacks \
             --stack-name ${{ env.ServiceName }}-${{ inputs.phase }}-apigw-stage-green \

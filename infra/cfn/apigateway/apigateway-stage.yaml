@@ -28,10 +28,15 @@ Parameters:
   APIFunctionAlias:
     Type: String
     Description: Alias name
+  APIFunctionAliasArn:
+    Type: String
+    Description: Alias ARN
 
 Resources:
   APIGatewayStage:
     Type: AWS::ApiGateway::Stage
+    DependsOn:
+      - APIFunctionPermission
     Properties:
       StageName: !Ref StageName
       RestApiId: !Ref APIGatewayId
@@ -43,6 +48,14 @@ Resources:
           Value: !Ref ServiceName
         - Key: Phase
           Value: !Ref Phase
+
+  APIFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref APIFunctionAliasArn
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:execute-api:${AWS::Region}:${AWS::AccountId}:${APIGatewayId}/*/*/*
 
 Outputs:
   APIGatewayStageId:
