@@ -9,27 +9,27 @@ import { GetBroadcastersHandler } from './handler/get-broadcasters.handler';
 export const routes: Array<Route<APIGatewayProxyEvent>> = [
   {
     method: 'GET',
-    path: '/broadcasters',
+    path: '/v1/broadcasters',
     handler: GetBroadcastersHandler,
   },
   {
     method: 'GET',
-    path: '/broadcasters/{broadcasterId}',
+    path: '/v1/broadcasters/{broadcasterId}',
     handler: GetBroadcasterHandler,
   },
   {
     method: 'GET',
-    path: '/streams',
+    path: '/v1/streams',
     handler: GetStreamsHandler,
   },
   {
     method: 'GET',
-    path: '/gifts',
+    path: '/v1/gifts',
     handler: GetGiftsHandler,
   },
   {
     method: 'POST',
-    path: '/gifts',
+    path: '/v1/gifts',
     handler: PostGiftsHandler,
   },
 ];
