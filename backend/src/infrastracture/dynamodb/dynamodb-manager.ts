@@ -3,6 +3,7 @@ import {
   WriteRequest,
   PutRequest,
   DeleteRequest,
+  Condition,
 } from '@aws-sdk/client-dynamodb';
 import {
   BatchWriteCommand,
@@ -20,6 +21,7 @@ import {
   marshall,
   unmarshall,
 } from '@aws-sdk/util-dynamodb';
+import { logger } from '../../logger';
 
 export class DynamodbManager {
   private static _instance: DynamodbManager;
@@ -29,11 +31,31 @@ export class DynamodbManager {
   private readonly documentClient: DynamoDBDocumentClient;
 
   private constructor() {
+    const isTest = process.env['JEST_WORKER_ID'];
+    let configOverride = {};
+    if (isTest) {
+      configOverride = {
+        endpoint: 'http://localhost:8001',
+        sslEnabled: false,
+        region: 'local-env',
+        accessKeyId: 'fakeAccessKeyId',
+        secretAccessKey: 'fakeSecretAccessKey',
+      };
+      process.env['OBJECT_TABLE'] = 'local-object-table';
+    }
+
     this.objectTable = process.env['OBJECT_TABLE']!;
     this.client = new DynamoDBClient({
       region: process.env['AWS_REGION'],
+      ...configOverride,
     });
     this.documentClient = DynamoDBDocumentClient.from(this.client);
+
+    logger.debug('DynamodbManager initialized', {
+      objectTable: this.objectTable,
+      client: this.client,
+      documentClient: this.documentClient,
+    });
   }
 
   public async get<T extends DynamodbEntity>(obj: T): Promise<T | null> {
@@ -49,22 +71,37 @@ export class DynamodbManager {
   }
 
   public async query<T extends DynamodbEntity>(
-    objs: T,
-    exclusiveStartKeyStr?: string
+    obj: T,
+    options?: {
+      exclusiveStartKeyStr?: string;
+      rangeKeyCondition?: Omit<Condition, 'AttributeValueList'> & {
+        AttributeValueList?: NativeAttributeValue[];
+      };
+      scanIndexForward?: boolean;
+    }
   ): Promise<[T[], string]> {
     let exclusiveStartKey: Record<string, NativeAttributeValue> | undefined;
-    if (exclusiveStartKeyStr) {
-      exclusiveStartKey = JSON.parse(exclusiveStartKeyStr);
+    if (options?.exclusiveStartKeyStr) {
+      exclusiveStartKey = JSON.parse(options.exclusiveStartKeyStr);
     }
     const command: QueryCommand = new QueryCommand({
       TableName: this.objectTable,
       KeyConditions: {
         hashKey: {
           ComparisonOperator: 'EQ',
-          AttributeValueList: [objs.hashKey],
+          AttributeValueList: [obj.hashKey],
         },
+        ...(options?.rangeKeyCondition
+          ? {
+              rangeKey: options?.rangeKeyCondition,
+            }
+          : {}),
       },
       ExclusiveStartKey: exclusiveStartKey,
+      ScanIndexForward:
+        typeof options?.scanIndexForward !== 'undefined'
+          ? options.scanIndexForward
+          : true,
     });
     const response = await this.documentClient.send(command);
     return [
@@ -119,7 +156,9 @@ export class DynamodbManager {
   private static marshall<T extends DynamodbEntity>(
     obj: T
   ): Record<string, NativeAttributeValue> {
-    return marshall<T>(obj);
+    return marshall<T>(obj, {
+      convertClassInstanceToMap: true,
+    });
   }
 
   private static unmarshall<T extends DynamodbEntity>(

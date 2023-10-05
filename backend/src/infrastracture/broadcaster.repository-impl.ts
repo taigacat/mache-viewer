@@ -3,6 +3,7 @@ import { BroadcasterRepository } from '../domain/repository/broadcaster.reposito
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
 import { BroadcasterDynamodbEntity } from './dynamodb/entity/broadcaster.dynamodb.entity';
 import { injectable } from 'inversify';
+import 'reflect-metadata';
 
 @injectable()
 export class BroadcasterRepositoryImpl implements BroadcasterRepository {
@@ -17,7 +18,9 @@ export class BroadcasterRepositoryImpl implements BroadcasterRepository {
   ): Promise<{ items: Broadcaster[]; nextToken?: string }> {
     const [items, newNextToken] = await this.manager.query(
       new BroadcasterDynamodbEntity({}),
-      nextToken
+      {
+        exclusiveStartKeyStr: nextToken,
+      }
     );
     return {
       items,

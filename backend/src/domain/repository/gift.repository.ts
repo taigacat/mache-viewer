@@ -4,10 +4,12 @@ export interface GiftRepository {
   /**
    * Find all gifts
    * @param streamId The stream id to find gifts for
+   * @param start The start index to find gifts for
    * @param nextToken The next token to use for pagination
    */
   findAllByStreamId(
     streamId: string,
+    start: number,
     nextToken?: string
   ): Promise<{ items: Gift[]; nextToken?: string }>;
 

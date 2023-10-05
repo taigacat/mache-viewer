@@ -3,6 +3,7 @@ import { Stream } from '../domain/model/stream';
 import { injectable } from 'inversify';
 import { StreamDynamodbEntity } from './dynamodb/entity/stream.dynamodb.entity';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
+import 'reflect-metadata';
 
 @injectable()
 export class StreamRepositoryImpl implements StreamRepository {
@@ -18,7 +19,10 @@ export class StreamRepositoryImpl implements StreamRepository {
   ): Promise<{ items: Stream[]; nextToken?: string }> {
     const [items, newNextToken] = await this.manager.query(
       new StreamDynamodbEntity({ broadcasterId }),
-      nextToken
+      {
+        exclusiveStartKeyStr: nextToken,
+        scanIndexForward: false,
+      }
     );
     return {
       items,
