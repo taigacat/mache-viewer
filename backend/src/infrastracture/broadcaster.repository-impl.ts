@@ -16,7 +16,7 @@ export class BroadcasterRepositoryImpl implements BroadcasterRepository {
     nextToken?: string
   ): Promise<{ items: Broadcaster[]; nextToken?: string }> {
     const [items, newNextToken] = await this.manager.query(
-      new BroadcasterDynamodbEntity(),
+      new BroadcasterDynamodbEntity({}),
       nextToken
     );
     return {
