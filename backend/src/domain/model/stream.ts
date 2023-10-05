@@ -1,10 +1,6 @@
 import { Historical } from './historical';
 
-export class Stream extends Historical {
+export interface Stream extends Historical {
+  broadcasterId: string;
   id: string;
-
-  constructor(id: string) {
-    super();
-    this.id = id;
-  }
 }

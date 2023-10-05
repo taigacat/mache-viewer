@@ -1,0 +1,140 @@
+import {
+  DynamoDBClient,
+  WriteRequest,
+  PutRequest,
+  DeleteRequest,
+} from '@aws-sdk/client-dynamodb';
+import {
+  BatchWriteCommand,
+  BatchWriteCommandOutput,
+  DynamoDBDocumentClient,
+  GetCommand,
+  GetCommandOutput,
+  PutCommand,
+  PutCommandOutput,
+  QueryCommand,
+} from '@aws-sdk/lib-dynamodb';
+import { DynamodbEntity } from './entity/dynamodb.entity';
+import {
+  NativeAttributeValue,
+  marshall,
+  unmarshall,
+} from '@aws-sdk/util-dynamodb';
+
+export class DynamodbManager {
+  private static _instance: DynamodbManager;
+
+  private readonly objectTable: string;
+  private readonly client: DynamoDBClient;
+  private readonly documentClient: DynamoDBDocumentClient;
+
+  private constructor() {
+    this.objectTable = process.env['OBJECT_TABLE']!;
+    this.client = new DynamoDBClient({
+      region: process.env['AWS_REGION'],
+    });
+    this.documentClient = DynamoDBDocumentClient.from(this.client);
+  }
+
+  public async get<T extends DynamodbEntity>(obj: T): Promise<T | null> {
+    const command = new GetCommand({
+      TableName: this.objectTable,
+      Key: {
+        hashKey: obj.hashKey,
+        rangeKey: obj.rangeKey,
+      },
+    });
+    const response: GetCommandOutput = await this.documentClient.send(command);
+    return DynamodbManager.unmarshall<T>(response.Item);
+  }
+
+  public async query<T extends DynamodbEntity>(
+    objs: T,
+    exclusiveStartKeyStr?: string
+  ): Promise<[T[], string]> {
+    let exclusiveStartKey: Record<string, NativeAttributeValue> | undefined;
+    if (exclusiveStartKeyStr) {
+      exclusiveStartKey = JSON.parse(exclusiveStartKeyStr);
+    }
+    const command: QueryCommand = new QueryCommand({
+      TableName: this.objectTable,
+      KeyConditions: {
+        hashKey: {
+          ComparisonOperator: 'EQ',
+          AttributeValueList: [objs.hashKey],
+        },
+      },
+      ExclusiveStartKey: exclusiveStartKey,
+    });
+    const response = await this.documentClient.send(command);
+    return [
+      response.Items?.map((item) => DynamodbManager.unmarshall<T>(item)!) ?? [],
+      JSON.stringify(response.LastEvaluatedKey),
+    ];
+  }
+
+  public async put<T extends DynamodbEntity>(obj: T): Promise<T> {
+    const command = new PutCommand({
+      TableName: this.objectTable,
+      Item: { ...obj },
+    });
+
+    const response: PutCommandOutput = await this.documentClient.send(command);
+    const entity = DynamodbManager.unmarshall<T>(response.Attributes);
+    if (!entity) {
+      throw new Error('Failed to put');
+    }
+    return entity;
+  }
+
+  public async putAll<T extends DynamodbEntity>(objs: T[]): Promise<void> {
+    let unprocessedItems: Record<
+      string,
+      (Omit<WriteRequest, 'PutRequest' | 'DeleteRequest'> & {
+        PutRequest?: Omit<PutRequest, 'Item'> & {
+          Item: Record<string, NativeAttributeValue> | undefined;
+        };
+        DeleteRequest?: Omit<DeleteRequest, 'Key'> & {
+          Key: Record<string, NativeAttributeValue> | undefined;
+        };
+      })[]
+    > = {
+      [this.objectTable]: objs.map((obj) => ({
+        PutRequest: {
+          Item: DynamodbManager.marshall(obj),
+        },
+      })),
+    };
+
+    do {
+      const command = new BatchWriteCommand({
+        RequestItems: unprocessedItems,
+      });
+      const response: BatchWriteCommandOutput =
+        await this.documentClient.send(command);
+      unprocessedItems = response.UnprocessedItems ?? {};
+    } while (Object.keys(unprocessedItems).length > 0);
+  }
+
+  private static marshall<T extends DynamodbEntity>(
+    obj: T
+  ): Record<string, NativeAttributeValue> {
+    return marshall<T>(obj);
+  }
+
+  private static unmarshall<T extends DynamodbEntity>(
+    record?: Record<string, NativeAttributeValue>
+  ): T | null {
+    if (typeof record === 'undefined') {
+      return null;
+    }
+    return unmarshall(record) as T;
+  }
+
+  public static getInstance(): DynamodbManager {
+    if (!this._instance) {
+      this._instance = new DynamodbManager();
+    }
+    return this._instance;
+  }
+}
