@@ -1,0 +1,21 @@
+name: Release Pipeline
+
+on:
+  release:
+    types:
+      - published
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    needs:
+      - build
+      - upload
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit
+    with:
+      phase: prd
+      build_version: ${{ github.event.release.tag_name }}

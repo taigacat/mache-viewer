@@ -34,5 +34,5 @@ jobs:
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
-      phase: ci
+      phase: dev
       build_version: ${{ needs.build.outputs.build_version }}
