@@ -99,7 +99,7 @@ jobs:
       - id: lambda-version-stack
         run: |
           aws cloudformation describe-stacks \
-            --stack-name ${{env.ServiceName}}-${{inputs.phase}}-lambda-version-${{inputs.build_version}} \
+            --stack-name ${{ env.ServiceName }}-${{ inputs.phase }}-lambda-version-${{ inputs.build_version }} \
             | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
             >> $GITHUB_OUTPUT
 
@@ -261,3 +261,39 @@ jobs:
             --stack-name ${{ env.ServiceName }}-${{ inputs.phase }}-cloudfront \
             | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
             >> $GITHUB_OUTPUT
+
+  delete-old-lambda-version:
+    runs-on: ubuntu-latest
+    needs:
+      - update-green
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.region }}
+      - name: Delete old version out of 5
+        run: |
+          aws cloudformation list-stacks \
+            --stack-status-filter CREATE_COMPLETE
+            --query 'StackSummaries[?starts_with(StackName, `${{ env.ServiceName }}-${{ inputs.phase }}-lambda-version-`) == `true`]' \
+          | jq 'sort_by(.StackName) | reverse | map(.StackName) | .[5:] | .[]'  \
+          | xargs -I{} aws cloudformation delete-stack --stack-name {}
+
+  delete-old-apigw-deployment:
+    runs-on: ubuntu-latest
+    needs:
+      - update-green
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.region }}
+      - name: Delete old version out of 5
+        run: |
+          aws cloudformation list-stacks \
+            --stack-status-filter CREATE_COMPLETE
+            --query 'StackSummaries[?starts_with(StackName, `${{ env.ServiceName }}-${{ inputs.phase }}-apigw-deployment-`) == `true`]' \
+          | jq 'sort_by(.StackName) | reverse | map(.StackName) | .[5:] | .[]'  \
+          | xargs -I{} aws cloudformation delete-stack --stack-name {}
