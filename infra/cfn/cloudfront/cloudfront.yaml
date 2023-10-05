@@ -65,7 +65,7 @@ Resources:
     Type: AWS::CloudFront::CachePolicy
     Properties:
       CachePolicyConfig:
-        Name: "StatefulCachePolicy"
+        Name: !Sub ${ServiceName}-${Phase}-CP-API
         DefaultTTL: 0
         MaxTTL: 86300
         MinTTL: 0
@@ -84,7 +84,7 @@ Resources:
     Properties:
       OriginAccessControlConfig:
         Description: !Sub 'OAC of ${ServiceName}-cmn-web. Created by ${AWS::StackName}'
-        Name: !Sub ${ServiceName}-cmn-web-OAC
+        Name: !Sub ${ServiceName}-cmn-web-OAC-${Phase}
         OriginAccessControlOriginType: s3
         SigningBehavior: always
         SigningProtocol: sigv4
