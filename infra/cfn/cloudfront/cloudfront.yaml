@@ -57,7 +57,6 @@ Resources:
             ViewerProtocolPolicy: redirect-to-https
         ViewerCertificate:
           AcmCertificateArn: arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/407e1f5b-0d87-4de3-8341-874d4ed32651
-          CloudFrontDefaultCertificate: false
           MinimumProtocolVersion: "TLSv1.2_2021"
           SslSupportMethod: sni-only
       Tags:
