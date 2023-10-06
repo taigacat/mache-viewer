@@ -9,10 +9,12 @@ info:
     url: https://github.com/taigacat
 
 servers:
-  - url: https://mache-viewer.4mo.co/api
+  - url: https://mache-viewer.4mo.co
     description: Production server
-  - url: https://mache-viewer-dev.4mo.co/api
+  - url: https://mache-viewer-dev.4mo.co
     description: Development server
+  - url: https://d2hpexv1rkb0p7.cloudfront.net
+    description: CI server
 
 x-amazon-apigateway-request-validators:
   all:
