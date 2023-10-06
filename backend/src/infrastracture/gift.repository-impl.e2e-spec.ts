@@ -1,13 +1,10 @@
 import { Gift } from '../domain/model/gift';
 import { container } from '../inversify.config';
 import { GiftRepository } from '../domain/repository/gift.repository';
+import { TYPES } from '../types';
 
 describe('GiftRepositoryImpl e2e', () => {
-  let giftRepository: GiftRepository = container.get('GiftRepository');
-
-  beforeAll(() => {
-    giftRepository = container.get('GiftRepository');
-  }, 30000);
+  const giftRepository: GiftRepository = container.get(TYPES.GiftRepository);
 
   it('should put and get', async () => {
     // Given

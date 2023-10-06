@@ -156,9 +156,18 @@ export class DynamodbManager {
   private static marshall<T extends DynamodbEntity>(
     obj: T
   ): Record<string, NativeAttributeValue> {
-    return marshall<T>(obj, {
-      convertClassInstanceToMap: true,
-    });
+    return marshall<T>(
+      {
+        ...obj,
+        hashKey: obj.hashKey,
+        rangeKey: obj.rangeKey,
+        ttl: obj.ttl,
+      },
+      {
+        convertClassInstanceToMap: true,
+        removeUndefinedValues: true,
+      }
+    );
   }
 
   private static unmarshall<T extends DynamodbEntity>(
