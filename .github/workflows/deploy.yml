@@ -275,7 +275,7 @@ jobs:
       - name: Delete old version out of 5
         run: |
           aws cloudformation list-stacks \
-            --stack-status-filter CREATE_COMPLETE
+            --stack-status-filter CREATE_COMPLETE \
             --query 'StackSummaries[?starts_with(StackName, `${{ env.ServiceName }}-${{ inputs.phase }}-lambda-version-`) == `true`]' \
           | jq 'sort_by(.StackName) | reverse | map(.StackName) | .[5:] | .[]'  \
           | xargs -I{} aws cloudformation delete-stack --stack-name {}
@@ -293,7 +293,7 @@ jobs:
       - name: Delete old version out of 5
         run: |
           aws cloudformation list-stacks \
-            --stack-status-filter CREATE_COMPLETE
+            --stack-status-filter CREATE_COMPLETE \
             --query 'StackSummaries[?starts_with(StackName, `${{ env.ServiceName }}-${{ inputs.phase }}-apigw-deployment-`) == `true`]' \
           | jq 'sort_by(.StackName) | reverse | map(.StackName) | .[5:] | .[]'  \
           | xargs -I{} aws cloudformation delete-stack --stack-name {}

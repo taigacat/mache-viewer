@@ -42,6 +42,7 @@ Resources:
       RestApiId: !Ref APIGatewayId
       DeploymentId: !Ref APIGatewayDeploymentId
       Variables:
+        Phase: !Ref Phase
         APIFunctionAlias: !Ref APIFunctionAlias
       Tags:
         - Key: Service
