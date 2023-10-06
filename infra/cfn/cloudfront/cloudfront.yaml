@@ -33,7 +33,7 @@ Resources:
         Enabled: true
         PriceClass: PriceClass_100
         DefaultRootObject: index.html
-        CNAMEs:
+        Aliases:
           - !FindInMap [DomainName, !Ref AWS::Region, !Ref Phase]
         Origins:
           - Id: !Sub s3-${ServiceName}-cmn-web
