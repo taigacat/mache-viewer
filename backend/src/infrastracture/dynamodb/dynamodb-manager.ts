@@ -8,13 +8,13 @@ import {
   PutCommandOutput,
   QueryCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { DynamodbEntity } from './entity/dynamodb.entity';
 import {
   marshall,
   NativeAttributeValue,
   unmarshall,
 } from '@aws-sdk/util-dynamodb';
 import { logger } from '../../logger';
+import { DynamoDBEntity } from './dynamodb.entity';
 
 /**
  * Manages interactions with DynamoDB for storing and retrieving objects.
@@ -58,7 +58,10 @@ export class DynamodbManager {
    * Get object from DynamoDB.
    * @param obj object
    */
-  public async get<T extends DynamodbEntity>(obj: T): Promise<T | null> {
+  public async get<T>(obj: {
+    hashKey: string;
+    rangeKey: string;
+  }): Promise<T | null> {
     logger.info('in', { class: 'DynamodbManager', method: 'get' });
     const command = new GetCommand({
       TableName: this.objectTable,
@@ -78,8 +81,8 @@ export class DynamodbManager {
    * @param obj condition object
    * @param options query options
    */
-  public async query<T extends DynamodbEntity>(
-    obj: T,
+  public async query<T>(
+    obj: { hashKey: string },
     options?: {
       exclusiveStartKeyStr?: string;
       rangeKeyCondition?: Omit<Condition, 'AttributeValueList'> & {
@@ -128,16 +131,16 @@ export class DynamodbManager {
    * Put object to DynamoDB.
    * @param obj object
    */
-  public async put<T extends DynamodbEntity>(obj: T): Promise<T> {
+  public async put<T extends DynamoDBEntity>(obj: T): Promise<T> {
     logger.info('in', { class: 'DynamodbManager', method: 'put' });
 
     const command = new PutCommand({
       TableName: this.objectTable,
-      Item: { obj, hashKey: obj.hashKey, rangeKey: obj.rangeKey },
+      Item: DynamodbManager.marshall(obj),
     });
     logger.debug('command', { command });
 
-    const response: PutCommandOutput = await this.documentClient.send(command);
+    const response: PutCommandOutput = await this.client.send(command);
     const entity = DynamodbManager.unmarshall<T>(response.Attributes);
     if (!entity) {
       throw new Error('Failed to put');
@@ -151,7 +154,7 @@ export class DynamodbManager {
    * Put objects to DynamoDB.
    * @param objs objects
    */
-  public async putAll<T extends DynamodbEntity>(objs: T[]): Promise<void> {
+  public async putAll<T extends DynamoDBEntity>(objs: T[]): Promise<void> {
     logger.info('in', { class: 'DynamodbManager', method: 'putAll' });
 
     const requestItems = [
@@ -162,7 +165,7 @@ export class DynamodbManager {
           .slice(part * 25, (part + 1) * 25)
           .map((obj) => ({
             PutRequest: {
-              Item: { obj, hashKey: obj.hashKey, rangeKey: obj.rangeKey },
+              Item: DynamodbManager.marshall(obj),
             },
           })),
       };
@@ -174,31 +177,38 @@ export class DynamodbManager {
           RequestItems: requestItem,
         });
         logger.debug('command', { command });
-        await this.documentClient.send(command);
+        await this.client.send(command);
       })
     );
 
     logger.info('out', { class: 'DynamodbManager', method: 'putAll' });
   }
 
-  private static marshall<T extends DynamodbEntity>(
-    obj: T
-  ): Record<string, NativeAttributeValue> {
-    return marshall<T>(
-      {
-        ...obj,
-        hashKey: obj.hashKey,
-        rangeKey: obj.rangeKey,
-        ttl: obj.ttl,
-      },
-      {
-        convertClassInstanceToMap: true,
-        removeUndefinedValues: true,
-      }
-    );
+  public static createHashKey(
+    object: string,
+    ...keyValues: [string, string][]
+  ): string {
+    return `object="${object}";${keyValues
+      .map(([key, value]) => `${key}="${value}";`)
+      .join('')}`;
   }
 
-  private static unmarshall<T extends DynamodbEntity>(
+  public static createRangeKey(...keyValues: [string, string][]): string {
+    if (keyValues.length === 0) {
+      return ' ';
+    }
+    return keyValues.map(([key, value]) => `${key}="${value}";`).join('');
+  }
+
+  private static marshall<T extends DynamoDBEntity>(
+    obj: T
+  ): Record<string, NativeAttributeValue> {
+    return marshall<T>(obj, {
+      removeUndefinedValues: true,
+    });
+  }
+
+  private static unmarshall<T>(
     record?: Record<string, NativeAttributeValue>
   ): T | null {
     if (typeof record === 'undefined') {

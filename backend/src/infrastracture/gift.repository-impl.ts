@@ -2,7 +2,6 @@ import { GiftRepository } from '../domain/repository/gift.repository';
 import { injectable } from 'inversify';
 import { Gift } from '../domain/model/gift';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
-import { GiftDynamodbEntity } from './dynamodb/entity/gift.dynamodb.entity';
 import 'reflect-metadata';
 import { logger } from '../logger';
 
@@ -19,13 +18,16 @@ export class GiftRepositoryImpl implements GiftRepository {
     start: number = 0,
     nextToken?: string
   ): Promise<{ items: Gift[]; nextToken?: string }> {
-    const entity = new GiftDynamodbEntity({ streamId, index: start });
-    const [items, newNextToken] = await this.manager.query(entity, {
+    const entity = {
+      hashKey: this.createHashKey(streamId),
+      rangeKey: this.createRangeKey(start),
+    };
+    const [items, newNextToken] = await this.manager.query<Gift>(entity, {
       exclusiveStartKeyStr: nextToken,
       scanIndexForward: true,
       rangeKeyCondition: {
         ComparisonOperator: 'GE',
-        AttributeValueList: [entity.getRangeKey()],
+        AttributeValueList: [entity.rangeKey],
       },
     });
     return {
@@ -37,8 +39,20 @@ export class GiftRepositoryImpl implements GiftRepository {
   async saveAll(gifts: Gift[]): Promise<void> {
     logger.info('in', { class: 'GiftRepositoryImpl', method: 'saveAll' });
     await this.manager.putAll(
-      gifts.map((gift) => new GiftDynamodbEntity(gift))
+      gifts.map((gift) => ({
+        ...gift,
+        hashKey: this.createHashKey(gift.streamId),
+        rangeKey: this.createRangeKey(gift.index),
+      }))
     );
     logger.info('out', { class: 'GiftRepositoryImpl', method: 'saveAll' });
+  }
+
+  private createHashKey(streamId: string): string {
+    return DynamodbManager.createHashKey('gift', ['streamId', streamId]);
+  }
+
+  private createRangeKey(index: number): string {
+    return DynamodbManager.createRangeKey(['index', `${index}`]);
   }
 }
