@@ -4,6 +4,7 @@ import { Gift } from '../domain/model/gift';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
 import { GiftDynamodbEntity } from './dynamodb/entity/gift.dynamodb.entity';
 import 'reflect-metadata';
+import { logger } from '../logger';
 
 @injectable()
 export class GiftRepositoryImpl implements GiftRepository {
@@ -34,8 +35,10 @@ export class GiftRepositoryImpl implements GiftRepository {
   }
 
   async saveAll(gifts: Gift[]): Promise<void> {
+    logger.info('in', { class: 'GiftRepositoryImpl', method: 'saveAll' });
     await this.manager.putAll(
       gifts.map((gift) => new GiftDynamodbEntity(gift))
     );
+    logger.info('out', { class: 'GiftRepositoryImpl', method: 'saveAll' });
   }
 }

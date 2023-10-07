@@ -4,6 +4,7 @@ import { injectable } from 'inversify';
 import { StreamDynamodbEntity } from './dynamodb/entity/stream.dynamodb.entity';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
 import 'reflect-metadata';
+import { logger } from '../logger';
 
 @injectable()
 export class StreamRepositoryImpl implements StreamRepository {
@@ -31,6 +32,9 @@ export class StreamRepositoryImpl implements StreamRepository {
   }
 
   async save(stream: Stream): Promise<Stream> {
-    return await this.manager.put(new StreamDynamodbEntity(stream));
+    logger.info('in', { class: 'StreamRepositoryImpl', method: 'save' });
+    const response = await this.manager.put(new StreamDynamodbEntity(stream));
+    logger.info('out', { class: 'StreamRepositoryImpl', method: 'save' });
+    return response;
   }
 }

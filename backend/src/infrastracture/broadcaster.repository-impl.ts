@@ -4,6 +4,7 @@ import { DynamodbManager } from './dynamodb/dynamodb-manager';
 import { BroadcasterDynamodbEntity } from './dynamodb/entity/broadcaster.dynamodb.entity';
 import { injectable } from 'inversify';
 import 'reflect-metadata';
+import { logger } from '../logger';
 
 @injectable()
 export class BroadcasterRepositoryImpl implements BroadcasterRepository {
@@ -29,6 +30,11 @@ export class BroadcasterRepositoryImpl implements BroadcasterRepository {
   }
 
   async save(broadcaster: Broadcaster): Promise<Broadcaster> {
-    return await this.manager.put(new BroadcasterDynamodbEntity(broadcaster));
+    logger.info('in', { class: 'BroadcasterRepositoryImpl', method: 'save' });
+    const response = await this.manager.put(
+      new BroadcasterDynamodbEntity(broadcaster)
+    );
+    logger.info('out', { class: 'BroadcasterRepositoryImpl', method: 'save' });
+    return response;
   }
 }

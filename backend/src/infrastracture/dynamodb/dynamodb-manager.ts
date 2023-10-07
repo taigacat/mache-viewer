@@ -59,6 +59,7 @@ export class DynamodbManager {
    * @param obj object
    */
   public async get<T extends DynamodbEntity>(obj: T): Promise<T | null> {
+    logger.info('in', { class: 'DynamodbManager', method: 'get' });
     const command = new GetCommand({
       TableName: this.objectTable,
       Key: {
@@ -66,7 +67,9 @@ export class DynamodbManager {
         rangeKey: obj.rangeKey,
       },
     });
+    logger.debug('command', { command });
     const response: GetCommandOutput = await this.documentClient.send(command);
+    logger.info('out', { class: 'DynamodbManager', method: 'get' });
     return DynamodbManager.unmarshall<T>(response.Item);
   }
 
@@ -85,6 +88,8 @@ export class DynamodbManager {
       scanIndexForward?: boolean;
     }
   ): Promise<[T[], string]> {
+    logger.info('in', { class: 'DynamodbManager', method: 'query' });
+
     let exclusiveStartKey: Record<string, NativeAttributeValue> | undefined;
     if (options?.exclusiveStartKeyStr) {
       exclusiveStartKey = JSON.parse(options.exclusiveStartKeyStr);
@@ -108,7 +113,11 @@ export class DynamodbManager {
           ? options.scanIndexForward
           : true,
     });
+    logger.debug('command', { command });
+
     const response = await this.documentClient.send(command);
+
+    logger.info('out', { class: 'DynamodbManager', method: 'query' });
     return [
       response.Items?.map((item) => DynamodbManager.unmarshall<T>(item)!) ?? [],
       JSON.stringify(response.LastEvaluatedKey),
@@ -120,16 +129,21 @@ export class DynamodbManager {
    * @param obj object
    */
   public async put<T extends DynamodbEntity>(obj: T): Promise<T> {
+    logger.info('in', { class: 'DynamodbManager', method: 'put' });
+
     const command = new PutCommand({
       TableName: this.objectTable,
       Item: DynamodbManager.marshall(obj),
     });
+    logger.debug('command', { command });
 
     const response: PutCommandOutput = await this.documentClient.send(command);
     const entity = DynamodbManager.unmarshall<T>(response.Attributes);
     if (!entity) {
       throw new Error('Failed to put');
     }
+
+    logger.info('out', { class: 'DynamodbManager', method: 'put' });
     return entity;
   }
 
@@ -138,6 +152,8 @@ export class DynamodbManager {
    * @param objs objects
    */
   public async putAll<T extends DynamodbEntity>(objs: T[]): Promise<void> {
+    logger.info('in', { class: 'DynamodbManager', method: 'putAll' });
+
     const requestItems = [
       ...Array(Math.floor(objs.length / 25) + 1).keys(),
     ].map((part) => {
@@ -157,9 +173,12 @@ export class DynamodbManager {
         const command = new BatchWriteCommand({
           RequestItems: requestItem,
         });
+        logger.debug('command', { command });
         await this.documentClient.send(command);
       })
     );
+
+    logger.info('out', { class: 'DynamodbManager', method: 'putAll' });
   }
 
   private static marshall<T extends DynamodbEntity>(
