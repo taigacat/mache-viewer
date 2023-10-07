@@ -64,6 +64,14 @@ Resources:
             OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
             CachePolicyId: !Ref CloudFrontCachePolicyAPI
             ViewerProtocolPolicy: redirect-to-https
+            AllowedMethods :
+              - GET
+              - HEAD
+              - OPTIONS
+              - POST
+              - PATCH
+              - PUT
+              - DELETE
         ViewerCertificate:
           AcmCertificateArn: !Sub arn:aws:acm:us-east-1:${AWS::AccountId}:certificate/407e1f5b-0d87-4de3-8341-874d4ed32651
           MinimumProtocolVersion: "TLSv1.2_2021"
