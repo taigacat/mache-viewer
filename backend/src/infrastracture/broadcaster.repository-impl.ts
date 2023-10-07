@@ -1,7 +1,7 @@
 import { Broadcaster } from '../domain/model/broadcaster';
 import { BroadcasterRepository } from '../domain/repository/broadcaster.repository';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
-import { id, injectable } from 'inversify';
+import { injectable } from 'inversify';
 import 'reflect-metadata';
 import { logger } from '../logger';
 
