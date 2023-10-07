@@ -1,13 +1,6 @@
-import {
-  DynamoDBClient,
-  WriteRequest,
-  PutRequest,
-  DeleteRequest,
-  Condition,
-} from '@aws-sdk/client-dynamodb';
+import { Condition, DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import {
   BatchWriteCommand,
-  BatchWriteCommandOutput,
   DynamoDBDocumentClient,
   GetCommand,
   GetCommandOutput,
@@ -17,12 +10,15 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 import { DynamodbEntity } from './entity/dynamodb.entity';
 import {
-  NativeAttributeValue,
   marshall,
+  NativeAttributeValue,
   unmarshall,
 } from '@aws-sdk/util-dynamodb';
 import { logger } from '../../logger';
 
+/**
+ * Manages interactions with DynamoDB for storing and retrieving objects.
+ */
 export class DynamodbManager {
   private static _instance: DynamodbManager;
 
@@ -58,6 +54,10 @@ export class DynamodbManager {
     });
   }
 
+  /**
+   * Get object from DynamoDB.
+   * @param obj object
+   */
   public async get<T extends DynamodbEntity>(obj: T): Promise<T | null> {
     const command = new GetCommand({
       TableName: this.objectTable,
@@ -70,6 +70,11 @@ export class DynamodbManager {
     return DynamodbManager.unmarshall<T>(response.Item);
   }
 
+  /**
+   * Query objects from DynamoDB.
+   * @param obj condition object
+   * @param options query options
+   */
   public async query<T extends DynamodbEntity>(
     obj: T,
     options?: {
@@ -110,10 +115,14 @@ export class DynamodbManager {
     ];
   }
 
+  /**
+   * Put object to DynamoDB.
+   * @param obj object
+   */
   public async put<T extends DynamodbEntity>(obj: T): Promise<T> {
     const command = new PutCommand({
       TableName: this.objectTable,
-      Item: { ...obj },
+      Item: DynamodbManager.marshall(obj),
     });
 
     const response: PutCommandOutput = await this.documentClient.send(command);
@@ -124,33 +133,33 @@ export class DynamodbManager {
     return entity;
   }
 
+  /**
+   * Put objects to DynamoDB.
+   * @param objs objects
+   */
   public async putAll<T extends DynamodbEntity>(objs: T[]): Promise<void> {
-    let unprocessedItems: Record<
-      string,
-      (Omit<WriteRequest, 'PutRequest' | 'DeleteRequest'> & {
-        PutRequest?: Omit<PutRequest, 'Item'> & {
-          Item: Record<string, NativeAttributeValue> | undefined;
-        };
-        DeleteRequest?: Omit<DeleteRequest, 'Key'> & {
-          Key: Record<string, NativeAttributeValue> | undefined;
-        };
-      })[]
-    > = {
-      [this.objectTable]: objs.map((obj) => ({
-        PutRequest: {
-          Item: DynamodbManager.marshall(obj),
-        },
-      })),
-    };
+    const requestItems = [
+      ...Array(Math.floor(objs.length / 25) + 1).keys(),
+    ].map((part) => {
+      return {
+        [this.objectTable]: objs
+          .slice(part * 25, (part + 1) * 25)
+          .map((obj) => ({
+            PutRequest: {
+              Item: DynamodbManager.marshall(obj),
+            },
+          })),
+      };
+    });
 
-    do {
-      const command = new BatchWriteCommand({
-        RequestItems: unprocessedItems,
-      });
-      const response: BatchWriteCommandOutput =
+    await Promise.all(
+      requestItems.map(async (requestItem) => {
+        const command = new BatchWriteCommand({
+          RequestItems: requestItem,
+        });
         await this.documentClient.send(command);
-      unprocessedItems = response.UnprocessedItems ?? {};
-    } while (Object.keys(unprocessedItems).length > 0);
+      })
+    );
   }
 
   private static marshall<T extends DynamodbEntity>(
