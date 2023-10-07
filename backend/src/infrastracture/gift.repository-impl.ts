@@ -38,6 +38,11 @@ export class GiftRepositoryImpl implements GiftRepository {
 
   async saveAll(gifts: Gift[]): Promise<void> {
     logger.info('in', { class: 'GiftRepositoryImpl', method: 'saveAll' });
+
+    if (gifts.length === 0) {
+      return Promise.resolve();
+    }
+
     await this.manager.putAll(
       gifts.map((gift) => ({
         ...gift,
@@ -54,6 +59,9 @@ export class GiftRepositoryImpl implements GiftRepository {
   }
 
   private createRangeKey(index: number): string {
-    return DynamodbManager.createRangeKey(['index', `${index}`]);
+    return DynamodbManager.createRangeKey([
+      'index',
+      `${index.toString().padStart(10, '0')}`,
+    ]);
   }
 }
