@@ -137,7 +137,7 @@ export class DynamodbManager {
     });
     logger.debug('command', { command });
 
-    const response: PutCommandOutput = await this.documentClient.send(command);
+    const response: PutCommandOutput = await this.client.send(command);
     const entity = DynamodbManager.unmarshall<T>(response.Attributes);
     if (!entity) {
       throw new Error('Failed to put');
@@ -174,7 +174,7 @@ export class DynamodbManager {
           RequestItems: requestItem,
         });
         logger.debug('command', { command });
-        await this.documentClient.send(command);
+        await this.client.send(command);
       })
     );
 
