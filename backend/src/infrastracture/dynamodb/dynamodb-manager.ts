@@ -200,6 +200,14 @@ export class DynamodbManager {
     return keyValues.map(([key, value]) => `${key}="${value}";`).join('');
   }
 
+  /**
+   * Generate TTL.
+   * @param seconds record expires in seconds
+   */
+  public static getTTL(seconds: number): number {
+    return Math.floor(new Date().getTime() / 1000) + seconds;
+  }
+
   private static marshall<T extends DynamoDBEntity>(
     obj: T
   ): Record<string, NativeAttributeValue> {

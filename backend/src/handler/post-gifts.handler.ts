@@ -16,14 +16,20 @@ export const PostGiftsHandler: APIGatewayProxyHandler = async (event) => {
   } = JSON.parse(event.body ?? '{}');
 
   await usecase.run({
-    broadcaster: {
-      id: request.broadcaster_id,
-      name: request.broadcaster_name,
-    },
-    stream: {
-      broadcasterId: request.broadcaster_id,
-      id: request.stream_id,
-    },
+    broadcaster:
+      request.gifts.all && request.gifts.all.length > 0
+        ? {
+            id: request.broadcaster_id,
+            name: request.broadcaster_name,
+          }
+        : undefined,
+    stream:
+      request.gifts.all && request.gifts.all.length > 0
+        ? {
+            broadcasterId: request.broadcaster_id,
+            id: request.stream_id,
+          }
+        : undefined,
     gifts:
       request.gifts.all && request.gifts.all.length > 0
         ? request.gifts.all.map((gift) => ({

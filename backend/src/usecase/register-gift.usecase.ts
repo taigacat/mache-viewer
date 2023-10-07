@@ -22,8 +22,8 @@ export class RegisterGiftUsecase
   constructor() {}
 
   async run(input: {
-    broadcaster: Broadcaster;
-    stream: Stream;
+    broadcaster?: Broadcaster;
+    stream?: Stream;
     gifts: Gift[];
   }): Promise<void> {
     const giftRepository = container.get<GiftRepository>(TYPES.GiftRepository);
@@ -35,10 +35,12 @@ export class RegisterGiftUsecase
     );
 
     const { broadcaster, stream, gifts } = input;
-    await Promise.all([
-      giftRepository.saveAll(gifts),
-      broadcasterRepository.save(broadcaster),
-      streamRepository.save(stream),
-    ]);
+    if (broadcaster) {
+      await broadcasterRepository.save(broadcaster);
+    }
+    if (stream) {
+      await streamRepository.save(stream);
+    }
+    await giftRepository.saveAll(gifts);
   }
 }

@@ -36,6 +36,7 @@ export class StreamRepositoryImpl implements StreamRepository {
       ...stream,
       hashKey: this.createHashKey(stream.broadcasterId),
       rangeKey: this.createRangeKey(stream.id),
+      ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
     });
     logger.info('out', { class: 'StreamRepositoryImpl', method: 'save' });
     return response;

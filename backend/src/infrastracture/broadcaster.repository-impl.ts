@@ -34,12 +34,13 @@ export class BroadcasterRepositoryImpl implements BroadcasterRepository {
       ...broadcaster,
       hashKey: this.createHashKey(),
       rangeKey: this.createRangeKey(broadcaster.id),
+      ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
     });
     logger.info('out', { class: 'BroadcasterRepositoryImpl', method: 'save' });
     return response;
   }
   private createHashKey(): string {
-    return DynamodbManager.createHashKey('stream');
+    return DynamodbManager.createHashKey('broadcaster');
   }
 
   private createRangeKey(id: string): string {
