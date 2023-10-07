@@ -57,11 +57,17 @@ export class DynamodbManager {
   /**
    * Get object from DynamoDB.
    * @param obj object
+   * @param options get options
    */
-  public async get<T>(obj: {
-    hashKey: string;
-    rangeKey: string;
-  }): Promise<T | null> {
+  public async get<T>(
+    obj: {
+      hashKey: string;
+      rangeKey: string;
+    },
+    options?: {
+      consistentRead?: boolean;
+    }
+  ): Promise<T | null> {
     logger.info('in', { class: 'DynamodbManager', method: 'get' });
     const command = new GetCommand({
       TableName: this.objectTable,
@@ -69,11 +75,13 @@ export class DynamodbManager {
         hashKey: obj.hashKey,
         rangeKey: obj.rangeKey,
       },
+      ConsistentRead: options?.consistentRead ?? false,
     });
     logger.debug('command', { command });
     const response: GetCommandOutput = await this.documentClient.send(command);
+    logger.debug('response', { response });
     logger.info('out', { class: 'DynamodbManager', method: 'get' });
-    return DynamodbManager.unmarshall<T>(response.Item);
+    return response.Item ? (response.Item as T) : null;
   }
 
   /**
@@ -131,23 +139,23 @@ export class DynamodbManager {
    * Put object to DynamoDB.
    * @param obj object
    */
-  public async put<T extends DynamoDBEntity>(obj: T): Promise<T> {
+  public async put<T extends DynamoDBEntity>(
+    obj: T
+  ): Promise<PutCommandOutput> {
     logger.info('in', { class: 'DynamodbManager', method: 'put' });
 
     const command = new PutCommand({
       TableName: this.objectTable,
       Item: obj,
+      ReturnValues: 'ALL_NEW',
     });
     logger.debug('command', { command });
 
     const response: PutCommandOutput = await this.documentClient.send(command);
-    const entity = DynamodbManager.unmarshall<T>(response.Attributes);
-    if (!entity) {
-      throw new Error('Failed to put');
-    }
+    logger.debug('response', { response });
 
     logger.info('out', { class: 'DynamodbManager', method: 'put' });
-    return entity;
+    return response;
   }
 
   /**

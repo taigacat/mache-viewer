@@ -13,6 +13,19 @@ export class StreamRepositoryImpl implements StreamRepository {
     this.manager = DynamodbManager.getInstance();
   }
 
+  async findById(broadcasterId: string, id: string): Promise<Stream | null> {
+    logger.info('in', { class: 'StreamRepositoryImpl', method: 'findById' });
+    const item = await this.manager.get<Stream>(
+      {
+        hashKey: this.createHashKey(broadcasterId),
+        rangeKey: this.createRangeKey(id),
+      },
+      { consistentRead: true }
+    );
+    logger.info('out', { class: 'StreamRepositoryImpl', method: 'findById' });
+    return item;
+  }
+
   async findAllByBroadcasterId(
     broadcasterId: string,
     nextToken?: string
@@ -32,14 +45,19 @@ export class StreamRepositoryImpl implements StreamRepository {
 
   async save(stream: Stream): Promise<Stream> {
     logger.info('in', { class: 'StreamRepositoryImpl', method: 'save' });
-    const response = await this.manager.put({
+    await this.manager.put({
       ...stream,
       hashKey: this.createHashKey(stream.broadcasterId),
       rangeKey: this.createRangeKey(stream.id),
       ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
     });
+    const item = await this.findById(stream.broadcasterId, stream.id);
+    if (!item) {
+      throw new Error('Failed to save stream');
+    }
+
     logger.info('out', { class: 'StreamRepositoryImpl', method: 'save' });
-    return response;
+    return item;
   }
 
   private createHashKey(broadcasterId: string): string {
