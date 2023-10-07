@@ -53,6 +53,7 @@ export class BroadcasterRepositoryImpl implements BroadcasterRepository {
       ...broadcaster,
       hashKey: this.createHashKey(),
       rangeKey: this.createRangeKey(broadcaster.id),
+      updatedAt: new Date().toISOString(),
       ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
     });
 

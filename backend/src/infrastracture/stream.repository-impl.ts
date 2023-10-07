@@ -49,6 +49,7 @@ export class StreamRepositoryImpl implements StreamRepository {
       ...stream,
       hashKey: this.createHashKey(stream.broadcasterId),
       rangeKey: this.createRangeKey(stream.id),
+      updatedAt: new Date().toISOString(),
       ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
     });
     const item = await this.findById(stream.broadcasterId, stream.id);

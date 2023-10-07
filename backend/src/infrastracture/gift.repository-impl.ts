@@ -48,6 +48,7 @@ export class GiftRepositoryImpl implements GiftRepository {
         ...gift,
         hashKey: this.createHashKey(gift.streamId),
         rangeKey: this.createRangeKey(gift.index),
+        updatedAt: new Date().toISOString(),
         ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
       }))
     );

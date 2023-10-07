@@ -1,4 +1,6 @@
-export interface Gift {
+import { Historical } from './historical';
+
+export interface Gift extends Historical {
   streamId: string;
   index: number;
   name: string;
