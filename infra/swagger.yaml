@@ -36,7 +36,7 @@ paths:
           schema:
             type: string
         - in: query
-          name: next_token
+          name: nextToken
           schema:
             type: string
       responses:
@@ -60,7 +60,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  next_token:
+                  nextToken:
                     type: string
                   items:
                     type: array
@@ -103,7 +103,7 @@ paths:
               method.response.header.Access-Control-Allow-Methods: "'*'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
 
-  /v1/broadcasters/{broadcaster_id}:
+  /v1/broadcasters/{broadcasterId}:
     get:
       summary: Get broadcaster
       description: Get broadcaster
@@ -111,7 +111,7 @@ paths:
         - broadcasters
       parameters:
         - in: path
-          name: broadcaster_id
+          name: broadcasterId
           required: true
           schema:
             $ref: '#/components/schemas/broadcasterId'
@@ -149,7 +149,7 @@ paths:
       description: Enable CORS by returning correct headers
       parameters:
         - in: path
-          name: broadcaster_id
+          name: broadcasterId
           required: true
           schema:
             $ref: '#/components/schemas/broadcasterId'
@@ -186,12 +186,12 @@ paths:
         - streams
       parameters:
         - in: query
-          name: broadcaster_id
+          name: broadcasterId
           required: true
           schema:
             $ref: '#/components/schemas/broadcasterId'
         - in: query
-          name: next_token
+          name: nextToken
           schema:
             type: string
       responses:
@@ -215,7 +215,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  next_token:
+                  nextToken:
                     type: string
                   items:
                     type: array
@@ -266,7 +266,7 @@ paths:
         - gifts
       parameters:
         - in: query
-          name: stream_id
+          name: streamId
           required: true
           schema:
             $ref: '#/components/schemas/streamId'
@@ -276,7 +276,7 @@ paths:
             type: number
             default: 1
         - in: query
-          name: next_token
+          name: nextToken
           schema:
             type: string
       responses:
@@ -300,7 +300,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  next_token:
+                  nextToken:
                     type: string
                   items:
                     type: array
@@ -326,11 +326,11 @@ paths:
             schema:
               type: object
               properties:
-                broadcaster_id:
+                broadcasterId:
                   $ref: '#/components/schemas/broadcasterId'
-                broadcaster_name:
+                broadcasterName:
                   $ref: '#/components/schemas/broadcasterName'
-                stream_id:
+                streamId:
                   $ref: '#/components/schemas/streamId'
                 gifts:
                   type: object
@@ -364,9 +364,9 @@ paths:
                   required:
                     - diff
               required:
-                - broadcaster_id
-                - broadcaster_name
-                - stream_id
+                - broadcasterId
+                - broadcasterName
+                - streamId
                 - gifts
       responses:
         '204':
@@ -431,9 +431,9 @@ components:
           $ref: '#/components/schemas/broadcasterId'
         name:
           $ref: '#/components/schemas/broadcasterName'
-        created_at:
+        createdAt:
           $ref: '#/components/schemas/createdAt'
-        updated_at:
+        updatedAt:
           $ref: '#/components/schemas/updatedAt'
       required:
         - id
@@ -455,13 +455,13 @@ components:
       properties:
         id:
           $ref: '#/components/schemas/streamId'
-        broadcaster_id:
+        broadcasterId:
           $ref: '#/components/schemas/broadcasterId'
-        broadcaster_name:
+        broadcasterName:
           $ref: '#/components/schemas/broadcasterName'
-        created_at:
+        createdAt:
           $ref: '#/components/schemas/createdAt'
-        updated_at:
+        updatedAt:
           $ref: '#/components/schemas/updatedAt'
 
     streamId:
@@ -483,23 +483,23 @@ components:
           $ref: '#/components/schemas/giftIndex'
         sender:
           $ref: '#/components/schemas/senderName'
-        stream_id:
+        streamId:
           $ref: '#/components/schemas/streamId'
-        broadcaster_id:
+        broadcasterId:
           $ref: '#/components/schemas/broadcasterId'
-        broadcaster_name:
+        broadcasterName:
           $ref: '#/components/schemas/broadcasterName'
-        created_at:
+        createdAt:
           $ref: '#/components/schemas/createdAt'
-        updated_at:
+        updatedAt:
           $ref: '#/components/schemas/updatedAt'
       required:
         - id
         - name
         - count
-        - stream_id
-        - broadcaster_id
-        - broadcaster_name
+        - streamId
+        - broadcasterId
+        - broadcasterName
 
     giftId:
       type: string

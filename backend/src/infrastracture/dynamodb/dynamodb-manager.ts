@@ -147,7 +147,6 @@ export class DynamodbManager {
     const command = new PutCommand({
       TableName: this.objectTable,
       Item: obj,
-      ReturnValues: 'ALL_NEW',
     });
     logger.debug('command', { command });
 

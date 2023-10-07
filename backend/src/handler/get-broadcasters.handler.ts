@@ -1,12 +1,16 @@
 import { APIGatewayProxyHandler } from 'aws-lambda';
-import { logger } from '../logger';
+import { GetBroadcasterListUsecase } from '../usecase/broadcaster/get-broadcaster-list.usecase';
 
 export const GetBroadcastersHandler: APIGatewayProxyHandler = async (event) => {
-  logger.debug(JSON.stringify(event));
+  const usecase = new GetBroadcasterListUsecase();
+  const nextToken = event.queryStringParameters
+    ? event.queryStringParameters['nextToken']
+    : undefined;
+
+  const result = await usecase.run({ nextToken });
+
   return {
     statusCode: 200,
-    body: JSON.stringify({
-      message: 'Hello World!',
-    }),
+    body: JSON.stringify(result),
   };
 };

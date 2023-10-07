@@ -1,12 +1,12 @@
-import { Usecase } from './usecase';
-import { Gift } from '../domain/model/gift';
-import { GiftRepository } from '../domain/repository/gift.repository';
-import { TYPES } from '../types';
-import { container } from '../inversify.config';
-import { BroadcasterRepository } from '../domain/repository/broadcaster.repository';
-import { StreamRepository } from '../domain/repository/stream.repository';
-import { Broadcaster } from '../domain/model/broadcaster';
-import { Stream } from '../domain/model/stream';
+import { Usecase } from '../usecase';
+import { Gift } from '../../domain/model/gift';
+import { GiftRepository } from '../../domain/repository/gift.repository';
+import { TYPES } from '../../types';
+import { container } from '../../inversify.config';
+import { BroadcasterRepository } from '../../domain/repository/broadcaster.repository';
+import { StreamRepository } from '../../domain/repository/stream.repository';
+import { Broadcaster } from '../../domain/model/broadcaster';
+import { Stream } from '../../domain/model/stream';
 
 export class RegisterGiftUsecase
   implements
@@ -19,8 +19,6 @@ export class RegisterGiftUsecase
       void
     >
 {
-  constructor() {}
-
   async run(input: {
     broadcaster?: Broadcaster;
     stream?: Stream;
