@@ -133,11 +133,11 @@ export class DynamodbManager {
 
     const command = new PutCommand({
       TableName: this.objectTable,
-      Item: DynamodbManager.marshall(obj),
+      Item: { obj, hashKey: obj.hashKey, rangeKey: obj.rangeKey },
     });
     logger.debug('command', { command });
 
-    const response: PutCommandOutput = await this.client.send(command);
+    const response: PutCommandOutput = await this.documentClient.send(command);
     const entity = DynamodbManager.unmarshall<T>(response.Attributes);
     if (!entity) {
       throw new Error('Failed to put');
@@ -162,7 +162,7 @@ export class DynamodbManager {
           .slice(part * 25, (part + 1) * 25)
           .map((obj) => ({
             PutRequest: {
-              Item: DynamodbManager.marshall(obj),
+              Item: { obj, hashKey: obj.hashKey, rangeKey: obj.rangeKey },
             },
           })),
       };
@@ -174,7 +174,7 @@ export class DynamodbManager {
           RequestItems: requestItem,
         });
         logger.debug('command', { command });
-        await this.client.send(command);
+        await this.documentClient.send(command);
       })
     );
 
