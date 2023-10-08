@@ -479,6 +479,10 @@ components:
           $ref: '#/components/schemas/giftIndex'
         sender:
           $ref: '#/components/schemas/senderName'
+        point:
+          $ref: '#/components/schemas/giftPoint'
+        type:
+          $ref: '#/components/schemas/giftType'
         streamId:
           $ref: '#/components/schemas/streamId'
         broadcasterId:
@@ -519,6 +523,20 @@ components:
       type: string
       description: Sender Name
       example: Taro Yamada
+
+    giftPoint:
+      type: integer
+      description: Gift Point
+      example: 100
+
+    giftType:
+      type: string
+      description: Gift Type
+      enum:
+        - 'point'
+        - 'smile'
+        - 'unknown'
+      example: point
 
     ### Common ###
     updatedAt:
