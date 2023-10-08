@@ -1,5 +1,5 @@
 import { Usecase } from '../usecase';
-import { Gift } from '../../domain/model/gift';
+import { Gift, giftPointMap } from '../../domain/model/gift';
 import { GiftRepository } from '../../domain/repository/gift.repository';
 import { TYPES } from '../../types';
 import { container } from '../../inversify.config';
@@ -7,6 +7,7 @@ import { BroadcasterRepository } from '../../domain/repository/broadcaster.repos
 import { StreamRepository } from '../../domain/repository/stream.repository';
 import { Broadcaster } from '../../domain/model/broadcaster';
 import { Stream } from '../../domain/model/stream';
+import { logger } from '../../logger';
 
 export class RegisterGiftUsecase
   implements
@@ -39,6 +40,16 @@ export class RegisterGiftUsecase
     if (stream) {
       await streamRepository.save(stream);
     }
-    await giftRepository.saveAll(gifts);
+    await giftRepository.saveAll(
+      gifts.map((gift) => {
+        const pointInfo = giftPointMap[gift.name];
+        if (!pointInfo) {
+          logger.warn('gift not found', { gift });
+          return { ...gift, type: 'unknown', point: 0 };
+        }
+        const { type, point } = giftPointMap[gift.name];
+        return { ...gift, type, point };
+      })
+    );
   }
 }

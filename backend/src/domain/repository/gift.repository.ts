@@ -1,4 +1,4 @@
-import { Gift } from '../model/gift';
+import { GiftWithPoint } from '../model/gift';
 
 export interface GiftRepository {
   /**
@@ -11,11 +11,11 @@ export interface GiftRepository {
     streamId: string,
     start: number,
     nextToken?: string
-  ): Promise<{ items: Gift[]; nextToken?: string }>;
+  ): Promise<{ items: GiftWithPoint[]; nextToken?: string }>;
 
   /**
    * Save all gifts
    * @param gifts The gifts to save
    */
-  saveAll(gifts: Gift[]): Promise<void>;
+  saveAll(gifts: GiftWithPoint[]): Promise<void>;
 }

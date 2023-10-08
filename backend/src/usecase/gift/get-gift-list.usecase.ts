@@ -1,4 +1,4 @@
-import { Gift } from '../../domain/model/gift';
+import { GiftWithPoint } from '../../domain/model/gift';
 import { Usecase } from '../usecase';
 import { container } from '../../inversify.config';
 import { TYPES } from '../../types';
@@ -8,14 +8,14 @@ export class GetGiftListUsecase
   implements
     Usecase<
       { streamId: string; start?: number; nextToken?: string },
-      { items: Gift[]; nextToken?: string }
+      { items: GiftWithPoint[]; nextToken?: string }
     >
 {
   async run(input: {
     streamId: string;
     start?: number;
     nextToken?: string;
-  }): Promise<{ items: Gift[]; nextToken?: string }> {
+  }): Promise<{ items: GiftWithPoint[]; nextToken?: string }> {
     const repository = container.get<GiftRepository>(TYPES.GiftRepository);
     return await repository.findAllByStreamId(
       input.streamId,

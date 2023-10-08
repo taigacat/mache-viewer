@@ -1,6 +1,6 @@
 import { GiftRepository } from '../domain/repository/gift.repository';
 import { injectable } from 'inversify';
-import { Gift } from '../domain/model/gift';
+import { GiftWithPoint } from '../domain/model/gift';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
 import 'reflect-metadata';
 import { logger } from '../logger';
@@ -17,31 +17,36 @@ export class GiftRepositoryImpl implements GiftRepository {
     streamId: string,
     start: number = 0,
     nextToken?: string
-  ): Promise<{ items: Gift[]; nextToken?: string }> {
+  ): Promise<{ items: GiftWithPoint[]; nextToken?: string }> {
     const entity = {
       hashKey: this.createHashKey(streamId),
       rangeKey: this.createRangeKey(start),
     };
-    const [items, newNextToken] = await this.manager.query<Gift>(entity, {
-      exclusiveStartKeyStr: nextToken,
-      scanIndexForward: true,
-      rangeKeyCondition: {
-        ComparisonOperator: 'GE',
-        AttributeValueList: [entity.rangeKey],
-      },
-    });
+    const [items, newNextToken] = await this.manager.query<GiftWithPoint>(
+      entity,
+      {
+        exclusiveStartKeyStr: nextToken,
+        scanIndexForward: true,
+        rangeKeyCondition: {
+          ComparisonOperator: 'GE',
+          AttributeValueList: [entity.rangeKey],
+        },
+      }
+    );
     return {
       items,
       nextToken: newNextToken,
     };
   }
 
-  async saveAll(gifts: Gift[]): Promise<void> {
+  async saveAll(gifts: GiftWithPoint[]): Promise<void> {
     logger.info('in', { class: 'GiftRepositoryImpl', method: 'saveAll' });
 
     if (gifts.length === 0) {
       return Promise.resolve();
     }
+
+    // TODO index = 0 のギフトが正しいとは限らない？→チェックする仕組みが必要になる
 
     await this.manager.putAll(
       gifts.map((gift) => ({
