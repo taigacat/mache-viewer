@@ -1,0 +1,38 @@
+main {
+  display: flex;
+  height: 100%;
+  width: 100%;
+
+  section {
+    display: flex;
+    flex-direction: column;
+
+    &.stream_section {
+      width: 240px;
+    }
+
+    &.gift_section {
+      flex: 2;
+
+      .points {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+
+    &.comment_section {
+      flex: 1;
+    }
+
+    app-point-card, mat-card {
+      margin: 6px;
+      min-height: 80px;
+      height: 100%;
+      flex: 1;
+    }
+  }
+
+  .table-container {
+    overflow: auto;
+  }
+}
