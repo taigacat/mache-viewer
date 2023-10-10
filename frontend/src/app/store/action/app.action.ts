@@ -9,23 +9,38 @@ export const AppAction = createActionGroup({
     /**
      * Broadcaster
      */
-    retrieveBroadcasters: emptyProps(),
-    getBroadcastersRequest: emptyProps(),
-    getBroadcastersResponse: props<{ broadcasters: Broadcaster[] }>(),
+    retrieveBroadcasters: props<{ more: boolean }>(),
+    getBroadcastersRequest: props<{ nextToken?: string }>(),
+    getBroadcastersResponse: props<{
+      broadcasters: Broadcaster[];
+      nextToken?: string;
+    }>(),
     selectBroadcaster: props<{ broadcasterId: string }>(),
 
     /**
      * Stream
      */
-    getStreamsRequest: props<{ broadcasterId: string }>(),
-    getStreamsResponse: props<{ broadcasterId: string; streams: Stream[] }>(),
+    getStreamsRequest: props<{ broadcasterId: string; more?: boolean }>(),
+    getStreamsResponse: props<{
+      broadcasterId: string;
+      streams: Stream[];
+      nextToken?: string;
+    }>(),
     selectStream: props<{ broadcasterId: string; streamId: string }>(),
 
     /**
      * Gift
      */
-    getGifts: props<{ streamId: string; more: boolean }>(),
-    getGiftsRequest: props<{ streamId: string }>(),
-    getGiftsResponse: props<{ streamId: string; gifts: Gift[] }>(),
+    getGifts: props<{ streamId: string; more?: boolean }>(),
+    getGiftsRequest: props<{
+      streamId: string;
+      start?: number;
+      nextToken?: string;
+    }>(),
+    getGiftsResponse: props<{
+      streamId: string;
+      gifts: Gift[];
+      nextToken?: string;
+    }>(),
   },
 });
