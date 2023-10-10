@@ -130,7 +130,7 @@ export class DynamodbManager {
 
     logger.info('out', { class: 'DynamodbManager', method: 'query' });
     return [
-      response.Items?.map((item) => DynamodbManager.unmarshall<T>(item)!) ?? [],
+      response.Items?.map((item) => item as T) ?? [],
       JSON.stringify(response.LastEvaluatedKey),
     ];
   }
