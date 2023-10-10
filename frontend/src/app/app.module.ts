@@ -20,20 +20,32 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { PointCardComponent } from './components/point-card/point-card.component';
 import { GiftListCardComponent } from './components/gift-list-card/gift-list-card.component';
+import { AppStoreModule } from './store/app-store.module';
+import { HttpClientModule } from '@angular/common/http';
+import { StreamListCardComponent } from './components/stream-list-card/stream-list-card.component';
 
 @NgModule({
-  declarations: [AppComponent, LogComponent, SettingComponent, PointCardComponent, GiftListCardComponent],
+  declarations: [
+    AppComponent,
+    LogComponent,
+    SettingComponent,
+    PointCardComponent,
+    GiftListCardComponent,
+    StreamListCardComponent,
+  ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     MatToolbarModule,
     MatIconModule,
     MatButtonModule,
+    HttpClientModule,
     RouterModule.forRoot([
       { path: 'log', component: LogComponent },
       { path: 'setting', component: SettingComponent },
       { path: '**', redirectTo: 'log' },
     ]),
+    AppStoreModule,
     MatSidenavModule,
     MatListModule,
     MatGridListModule,

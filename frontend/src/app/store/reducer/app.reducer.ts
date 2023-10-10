@@ -6,7 +6,7 @@ import { PaginationEntity } from '../../models/entity/pagination-eneity';
 import { Stream } from '../../models/domain/stream';
 import { Gift } from '../../models/domain/gift';
 
-const appReducer = createReducer(
+export const appReducer = createReducer(
   initialState,
   on(AppAction.getBroadcastersResponse, (state, { broadcasters }) => ({
     ...state,

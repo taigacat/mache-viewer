@@ -1,26 +1,6 @@
 <main>
   <section class="stream_section">
-    <mat-card>
-      <form *ngIf="form" [formGroup]="form">
-        <mat-form-field class="example-full-width">
-          <mat-label>配信者</mat-label>
-          <input
-            type="text"
-            matInput
-            formControlName="broadcaster"
-            [matAutocomplete]="auto"
-          />
-          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayFn">
-            <mat-option
-              *ngFor="let option of filteredOptions | async"
-              [value]="option"
-            >
-              {{ option.name }}
-            </mat-option>
-          </mat-autocomplete>
-        </mat-form-field>
-      </form>
-    </mat-card>
+    <app-stream-list-card></app-stream-list-card>
   </section>
   <section class="gift_section">
     <div class="points">
