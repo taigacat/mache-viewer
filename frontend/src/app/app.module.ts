@@ -28,6 +28,7 @@ import { metaReducers } from './store/meta.reducer';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BroadcasterSelectorComponent } from './components/broadcaster-selector/broadcaster-selector.component';
+import { MatRadioModule } from '@angular/material/radio';
 
 @NgModule({
   declarations: [
@@ -64,6 +65,7 @@ import { BroadcasterSelectorComponent } from './components/broadcaster-selector/
     MatAutocompleteModule,
     MatInputModule,
     MatTableModule,
+    MatRadioModule,
   ],
   providers: [],
   bootstrap: [AppComponent],

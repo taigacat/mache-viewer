@@ -1,21 +1,21 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { Stream } from '../../models/domain/stream';
+import { Store } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { AppSelector } from '../../store/selector/app.selector';
+import { AppAction } from '../../store/action/app.action';
 
 @Component({
   selector: 'app-stream-list-card',
   templateUrl: './stream-list-card.component.html',
   styleUrls: ['./stream-list-card.component.scss'],
 })
-export class StreamListCardComponent implements OnInit {
-  @Input()
-  streams: Stream[] = [];
+export class StreamListCardComponent {
+  streams$: Observable<Stream[]> = this.store.select(AppSelector.allStreams);
 
-  @Output()
-  selectStream: EventEmitter<Stream> = new EventEmitter<Stream>();
+  constructor(private store: Store) {}
 
-  constructor() {}
-
-  ngOnInit(): void {
-    console.log(this.streams);
+  selectStream(stream: Stream) {
+    this.store.dispatch(AppAction.selectStream({ stream }));
   }
 }

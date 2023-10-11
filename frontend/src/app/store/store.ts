@@ -11,27 +11,22 @@ export interface AppState {
   streams: {
     selected?: Stream;
     data: {
-      [key: string]: PaginationEntity<Stream>;
+      [broadcasterId: string]: PaginationEntity<Stream>;
     };
   };
   gifts: {
-    data: PaginationEntity<Gift>;
+    [streamId: string]: PaginationEntity<Gift>;
   };
 }
 
 export const initialState: AppState = {
   broadcasters: {
     selected: undefined,
-    data: new PaginationEntity<Broadcaster>([
-      { id: '1', name: 'test', updatedAt: new Date() },
-      { id: '2', name: 'test2', updatedAt: new Date() },
-    ]),
+    data: new PaginationEntity<Broadcaster>(),
   },
   streams: {
     selected: undefined,
     data: {},
   },
-  gifts: {
-    data: new PaginationEntity<Gift>(),
-  },
+  gifts: {},
 };

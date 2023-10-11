@@ -1,18 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { Broadcaster } from '../../models/domain/broadcaster';
-import {
-  combineLatest,
-  combineLatestAll,
-  map,
-  merge,
-  Observable,
-  pipe,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { combineLatest, map, Observable } from 'rxjs';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Store } from '@ngrx/store';
 import { AppAction } from '../../store/action/app.action';

@@ -1,5 +1,5 @@
-import { Environment } from './environment';
+import { IEnvironment } from './i-environment';
 
-export const environment: Environment = {
+export const environment: IEnvironment = {
   baseUrl: '',
 };

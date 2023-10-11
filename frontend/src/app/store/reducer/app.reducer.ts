@@ -32,11 +32,13 @@ export const appReducer = createReducer(
       },
     },
   })),
-  on(AppAction.selectStream, (state, { broadcasterId, stream }) => ({
+  on(AppAction.selectStream, (state, { stream }) => ({
     ...state,
     streams: {
       ...state.streams,
-      selected: state.streams.data[broadcasterId]?.get(stream.id),
+      selected: state.broadcasters.selected?.id
+        ? state.streams.data[state.broadcasters.selected.id]?.get(stream.id)
+        : undefined,
     },
   })),
   on(AppAction.getGiftsResponse, (state, { streamId, gifts }) => ({

@@ -1,3 +1,9 @@
 <mat-card style="height: 100%">
   <app-broadcaster-selector></app-broadcaster-selector>
+
+  <mat-radio-group (change)="selectStream($event.value)">
+    <mat-radio-button *ngFor="let stream of streams$ | async" [value]="stream">
+      {{ stream.updatedAt | date: 'short' }}
+    </mat-radio-button>
+  </mat-radio-group>
 </mat-card>

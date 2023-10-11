@@ -26,7 +26,7 @@ export const AppAction = createActionGroup({
       streams: Stream[];
       nextToken?: string;
     }>(),
-    selectStream: props<{ broadcasterId: string; stream: Stream }>(),
+    selectStream: props<{ stream: Stream }>(),
 
     /**
      * Gift

@@ -8,7 +8,7 @@ describe('BroadcasterSelectorComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [BroadcasterSelectorComponent]
+      declarations: [BroadcasterSelectorComponent],
     });
     fixture = TestBed.createComponent(BroadcasterSelectorComponent);
     component = fixture.componentInstance;
