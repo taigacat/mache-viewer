@@ -228,6 +228,22 @@ jobs:
             | jq -r '.Stacks[] | .Outputs[] | [.OutputKey,.OutputValue] | join("=")' \
             >> $GITHUB_OUTPUT
 
+  update-frontend:
+    runs-on: ubuntu-latest
+    needs:
+      - update-green
+      - update-blue
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ inputs.region }}
+      - name: Copy static files
+        run: |
+          aws s3 sync s3://${{ env.ServiceName }}-cmn-mdl/build/${{ inputs.build_version }}/frontend/ \
+            s3://${{ env.ServiceName }}-cmn-web/${{ inputs.phase }}/web/
+
   update-cloudfront:
     runs-on: ubuntu-latest
     needs:
