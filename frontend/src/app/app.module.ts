@@ -23,6 +23,11 @@ import { GiftListCardComponent } from './components/gift-list-card/gift-list-car
 import { AppStoreModule } from './store/app-store.module';
 import { HttpClientModule } from '@angular/common/http';
 import { StreamListCardComponent } from './components/stream-list-card/stream-list-card.component';
+import { StoreModule } from '@ngrx/store';
+import { metaReducers } from './store/meta.reducer';
+import { EffectsModule } from '@ngrx/effects';
+import { StoreDevtoolsModule } from '@ngrx/store-devtools';
+import { BroadcasterSelectorComponent } from './components/broadcaster-selector/broadcaster-selector.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +37,7 @@ import { StreamListCardComponent } from './components/stream-list-card/stream-li
     PointCardComponent,
     GiftListCardComponent,
     StreamListCardComponent,
+    BroadcasterSelectorComponent,
   ],
   imports: [
     BrowserModule,
@@ -45,7 +51,10 @@ import { StreamListCardComponent } from './components/stream-list-card/stream-li
       { path: 'setting', component: SettingComponent },
       { path: '**', redirectTo: 'log' },
     ]),
+    StoreModule.forRoot({}, { metaReducers }),
+    EffectsModule.forRoot([]),
     AppStoreModule,
+    StoreDevtoolsModule.instrument({}),
     MatSidenavModule,
     MatListModule,
     MatGridListModule,

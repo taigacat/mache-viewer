@@ -15,7 +15,7 @@ export const AppAction = createActionGroup({
       broadcasters: Broadcaster[];
       nextToken?: string;
     }>(),
-    selectBroadcaster: props<{ broadcasterId: string }>(),
+    selectBroadcaster: props<{ broadcaster: Broadcaster }>(),
 
     /**
      * Stream
@@ -26,7 +26,7 @@ export const AppAction = createActionGroup({
       streams: Stream[];
       nextToken?: string;
     }>(),
-    selectStream: props<{ broadcasterId: string; streamId: string }>(),
+    selectStream: props<{ broadcasterId: string; stream: Stream }>(),
 
     /**
      * Gift

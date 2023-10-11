@@ -22,7 +22,10 @@ export interface AppState {
 export const initialState: AppState = {
   broadcasters: {
     selected: undefined,
-    data: new PaginationEntity<Broadcaster>(),
+    data: new PaginationEntity<Broadcaster>([
+      { id: '1', name: 'test', updatedAt: new Date() },
+      { id: '2', name: 'test2', updatedAt: new Date() },
+    ]),
   },
   streams: {
     selected: undefined,

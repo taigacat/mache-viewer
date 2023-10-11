@@ -17,6 +17,17 @@ export class AppEffect {
   );
 
   getBroadcastersRequest$ = createEffect(() =>
-    this.actions$.pipe(ofType(AppAction.getBroadcastersRequest))
+    this.actions$.pipe(
+      ofType(AppAction.getBroadcastersRequest),
+      map(() => {
+        return AppAction.getBroadcastersResponse({
+          broadcasters: [
+            { id: '1', name: 'broadcaster1', updatedAt: new Date() },
+            { id: '2', name: 'broadcaster2', updatedAt: new Date() },
+          ],
+          nextToken: undefined,
+        });
+      })
+    )
   );
 }
