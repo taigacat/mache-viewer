@@ -53,3 +53,4 @@ jobs:
         with:
           tag_name: ${{ steps.tag-name.outputs.tag_name }}
           generate_release_notes: true
+          draft: true
