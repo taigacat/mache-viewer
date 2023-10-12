@@ -34,7 +34,7 @@ Resources:
         PriceClass: PriceClass_100
         DefaultRootObject: index.html
         Aliases:
-          - !FindInMap [DomainName, !Ref AWS::Region, !Ref Phase]
+          - !FindInMap [ DomainName, !Ref AWS::Region, !Ref Phase ]
         Origins:
           - Id: !Sub s3-${ServiceName}-cmn-web
             DomainName: !Sub ${ServiceName}-cmn-web.s3.amazonaws.com
@@ -58,13 +58,16 @@ Resources:
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized
           OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
           Compress: true
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt CloudFrontFunction.FunctionARN
         CacheBehaviors:
           - PathPattern: "/v*"
             TargetOriginId: !Sub apigw-${ServiceName}-${Phase}-api
             OriginRequestPolicyId: acba4595-bd28-49b8-b9fe-13317c0390fa # UserAgentRefererHeaders
             CachePolicyId: !Ref CloudFrontCachePolicyAPI
             ViewerProtocolPolicy: redirect-to-https
-            AllowedMethods :
+            AllowedMethods:
               - GET
               - HEAD
               - OPTIONS
@@ -137,6 +140,31 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+
+  CloudFrontFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub ${ServiceName}-cmn-web-${Phase}-function
+      FunctionCode: !Sub
+        - |
+          function handler(event) {
+            console.log(event);
+            var request = event.request;
+            var currentUri = request.uri;
+
+            var doReplace = request.method === "GET" && currentUri.indexOf(".") === -1;
+
+            if (doReplace) {
+              var indexPath = "/index.html";
+              request.uri = indexPath;
+            }
+
+            return request;
+          }
+      FunctionConfig:
+        Comment: !Sub 'Function for ${ServiceName}-cmn-web. Created by ${AWS::StackName}'
+        Runtime: cloudfront-js-1.0
+      AutoPublish: true
 
 Outputs:
   CloudFrontDistributionId:
