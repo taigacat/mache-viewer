@@ -128,7 +128,7 @@ Resources:
               Service: cloudfront.amazonaws.com
             Condition:
               StringEquals:
-                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
           - Action: s3:ListBucket
             Effect: Allow
             Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web
@@ -136,7 +136,7 @@ Resources:
               Service: cloudfront.amazonaws.com
             Condition:
               StringEquals:
-                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}
+                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
 
 Outputs:
   CloudFrontDistributionId:
