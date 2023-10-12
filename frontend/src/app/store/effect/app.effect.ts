@@ -6,14 +6,12 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Broadcaster } from '../../models/domain/broadcaster';
 import { Stream } from '../../models/domain/stream';
-import { Store } from '@ngrx/store';
 import { Gift } from '../../models/domain/gift';
 
 @Injectable()
 export class AppEffect {
   constructor(
     private actions$: Actions,
-    private store: Store,
     private http: HttpClient
   ) {}
 
