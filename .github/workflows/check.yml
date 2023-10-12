@@ -7,7 +7,7 @@ jobs:
   cfn-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: scottbrenner/cfn-lint-action@v2
       - name: Print the Cloud Formation Linter Version & run Linter.
         run: |
@@ -18,7 +18,7 @@ jobs:
   openapi-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: npx @stoplight/spectral-cli lint swagger.yaml
         working-directory: infra
 
@@ -28,7 +28,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: 18
@@ -45,7 +45,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v2
         with:
           node-version: 18

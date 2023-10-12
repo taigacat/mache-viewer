@@ -43,7 +43,7 @@ jobs:
       - build
       - deploy
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Tag name
         id: tag-name
         run: |

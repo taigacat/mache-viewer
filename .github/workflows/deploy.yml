@@ -27,7 +27,7 @@ jobs:
     outputs:
       DynamoDbObjectTable: ${{ steps.dynamodb-stack.outputs.DynamoDbObjectTable }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -61,7 +61,7 @@ jobs:
       APIGatewayId: ${{ steps.apigw-stack.outputs.APIGatewayId }}
       APIGatewayDeploymentId: ${{ steps.apigw-deployment-stack.outputs.APIGatewayDeploymentId }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -186,7 +186,7 @@ jobs:
     needs:
       - update-blue
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -253,7 +253,7 @@ jobs:
       CloudFrontDistributionId: ${{ steps.cloudfront-stack.outputs.CloudFrontDistributionId }}
       CloudFrontDistributionDomainName: ${{ steps.cloudfront-stack.outputs.CloudFrontDistributionDomainName }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
