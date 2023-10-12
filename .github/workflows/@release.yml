@@ -11,9 +11,6 @@ permissions:
 
 jobs:
   deploy:
-    needs:
-      - build
-      - upload
     uses: ./.github/workflows/deploy.yml
     secrets: inherit
     with:
