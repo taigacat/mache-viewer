@@ -34,7 +34,10 @@ export class GiftRepositoryImpl implements GiftRepository {
       }
     );
     return {
-      items,
+      items: items.map((item) => ({
+        ...item,
+        id: item.index,
+      })),
       nextToken: newNextToken,
     };
   }
