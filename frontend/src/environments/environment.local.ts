@@ -1,5 +1,5 @@
 import { IEnvironment } from './i-environment';
 
 export const environment: IEnvironment = {
-  baseUrl: '',
+  baseUrl: 'https://mache-viewer-dev.4mo.co',
 };
