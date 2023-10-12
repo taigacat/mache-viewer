@@ -34,5 +34,8 @@ export const GetGiftsHandler: APIGatewayProxyHandler = async (event) => {
   return {
     statusCode: 200,
     body: JSON.stringify(response),
+    headers: {
+      'cache-control': 'max-age=60',
+    },
   };
 };

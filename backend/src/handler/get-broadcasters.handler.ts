@@ -12,5 +12,8 @@ export const GetBroadcastersHandler: APIGatewayProxyHandler = async (event) => {
   return {
     statusCode: 200,
     body: JSON.stringify(result),
+    headers: {
+      'cache-control': 'max-age=60',
+    },
   };
 };
