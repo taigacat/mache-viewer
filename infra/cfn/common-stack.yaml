@@ -50,7 +50,7 @@ Resources:
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
-              StringEquals:
+              StringLike:
                 AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
           - Action: s3:ListBucket
             Effect: Allow
@@ -58,7 +58,7 @@ Resources:
             Principal:
               Service: cloudfront.amazonaws.com
             Condition:
-              StringEquals:
+              StringLike:
                 AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
 
 Outputs:
