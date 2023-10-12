@@ -24,6 +24,11 @@ Mappings:
       prd: mache-viewer.4mo.co
       dev: mache-viewer-dev.4mo.co
       ci: mache-viewer-ci.4mo.co
+  PriceClass:
+    ap-northeast-1:
+      prd: PriceClass_200
+      dev: PriceClass_100
+      ci: PriceClass_100
 
 Resources:
   CloudFrontDistribution:
@@ -31,7 +36,7 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: true
-        PriceClass: PriceClass_100
+        PriceClass: !FindInMap [PriceClass, !Ref AWS::Region, !Ref Phase]
         DefaultRootObject: index.html
         Aliases:
           - !FindInMap [DomainName, !Ref AWS::Region, !Ref Phase]
