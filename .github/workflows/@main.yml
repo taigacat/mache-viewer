@@ -43,6 +43,7 @@ jobs:
       - build
       - deploy
     steps:
+      - uses: actions/checkout@v2
       - name: Create tag
         run: |
           git tag -a v${{ needs.build.outputs.build_version }}
