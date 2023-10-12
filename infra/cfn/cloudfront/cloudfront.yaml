@@ -115,29 +115,6 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
-  S3BucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Sub ${ServiceName}-cmn-web
-      PolicyDocument:
-        Statement:
-          - Action: s3:GetObject
-            Effect: Allow
-            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web/*
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
-          - Action: s3:ListBucket
-            Effect: Allow
-            Resource: !Sub arn:${AWS::Partition}:s3:::${ServiceName}-cmn-web
-            Principal:
-              Service: cloudfront.amazonaws.com
-            Condition:
-              StringEquals:
-                AWS:SourceArn: !Sub arn:${AWS::Partition}:cloudfront::${AWS::AccountId}:distribution/*
-
 Outputs:
   CloudFrontDistributionId:
     Description: CloudFront distribution
