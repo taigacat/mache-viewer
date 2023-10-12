@@ -30,6 +30,8 @@ import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { BroadcasterSelectorComponent } from './components/broadcaster-selector/broadcaster-selector.component';
 import { MatRadioModule } from '@angular/material/radio';
 
+import '@angular/common/locales/global/ja';
+
 @NgModule({
   declarations: [
     AppComponent,

@@ -3,7 +3,7 @@
 
   <mat-radio-group (change)="selectStream($event.value)">
     <mat-radio-button *ngFor="let stream of streams$ | async" [value]="stream">
-      {{ stream.updatedAt | date: 'short' }}
+      {{ stream.updatedAt | date: 'medium' : 'Asia/Tokyo' : 'ja-JP' }}
     </mat-radio-button>
   </mat-radio-group>
 </mat-card>

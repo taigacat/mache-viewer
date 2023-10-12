@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { AppAction } from '../action/app.action';
-import { map, switchMap } from 'rxjs';
+import { distinctUntilKeyChanged, map, switchMap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Broadcaster } from '../../models/domain/broadcaster';
@@ -46,6 +46,7 @@ export class AppEffect {
   selectBroadcaster$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AppAction.selectBroadcaster),
+      distinctUntilKeyChanged('broadcaster'),
       map(({ broadcaster }) => {
         return AppAction.getStreamsRequest({
           broadcasterId: broadcaster.id,
@@ -89,6 +90,7 @@ export class AppEffect {
   selectStream$ = createEffect(() =>
     this.actions$.pipe(
       ofType(AppAction.selectStream),
+      distinctUntilKeyChanged('stream'),
       map(({ stream }) => {
         return AppAction.getGiftsRequest({
           streamId: stream.id,
