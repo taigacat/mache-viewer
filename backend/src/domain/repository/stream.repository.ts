@@ -4,11 +4,7 @@ export interface StreamRepository {
   /**
    * Find a stream by id
    */
-  findById(
-    broadcasterId: string,
-    id: string,
-    updatedAt: Date
-  ): Promise<Stream | null>;
+  findById(broadcasterId: string, id: string): Promise<Stream | null>;
 
   /**
    * Find all streams

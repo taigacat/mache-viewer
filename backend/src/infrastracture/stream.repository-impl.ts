@@ -13,16 +13,12 @@ export class StreamRepositoryImpl implements StreamRepository {
     this.manager = DynamodbManager.getInstance();
   }
 
-  async findById(
-    broadcasterId: string,
-    id: string,
-    updatedAt: Date
-  ): Promise<Stream | null> {
+  async findById(broadcasterId: string, id: string): Promise<Stream | null> {
     logger.info('in', { class: 'StreamRepositoryImpl', method: 'findById' });
     const item = await this.manager.get<Stream>(
       {
         hashKey: this.createHashKey(broadcasterId),
-        rangeKey: this.createRangeKey(id, updatedAt),
+        rangeKey: this.createRangeKey(id),
       },
       { consistentRead: true }
     );
@@ -53,11 +49,11 @@ export class StreamRepositoryImpl implements StreamRepository {
     await this.manager.put({
       ...stream,
       hashKey: this.createHashKey(stream.broadcasterId),
-      rangeKey: this.createRangeKey(stream.id, now),
+      rangeKey: this.createRangeKey(stream.id),
       updatedAt: now.toISOString(),
       ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
     });
-    const item = await this.findById(stream.broadcasterId, stream.id, now);
+    const item = await this.findById(stream.broadcasterId, stream.id);
     if (!item) {
       throw new Error('Failed to save stream');
     }
@@ -73,11 +69,7 @@ export class StreamRepositoryImpl implements StreamRepository {
     ]);
   }
 
-  private createRangeKey(streamId: string, updatedAt: Date): string {
-    const updateAtReverse = 9999999999999 - updatedAt.getTime();
-    return DynamodbManager.createRangeKey(
-      ['updateAtReverse', `${updateAtReverse}`],
-      ['id', streamId]
-    );
+  private createRangeKey(streamId: string): string {
+    return DynamodbManager.createRangeKey(['id', streamId]);
   }
 }
