@@ -26,13 +26,15 @@
     "@middy/http-error-handler": "^4.6.4",
     "@middy/http-header-normalizer": "^4.6.4",
     "@middy/http-router": "^4.6.4",
-    "aws-lambda": "^1.0.7"
+    "aws-lambda": "^1.0.7",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@shelf/jest-dynamodb": "^3.4.2",
     "@tsconfig/node18": "^18.2.2",
     "@types/aws-lambda": "^8.10.122",
     "@types/jest": "^29.5.5",
+    "@types/lodash": "^4.14.199",
     "@types/node": "^20.7.0",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.3",

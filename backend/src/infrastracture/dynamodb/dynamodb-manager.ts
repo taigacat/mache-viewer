@@ -98,7 +98,7 @@ export class DynamodbManager {
       };
       scanIndexForward?: boolean;
     }
-  ): Promise<[T[], string]> {
+  ): Promise<[T[], string | undefined]> {
     logger.info('in', { class: 'DynamodbManager', method: 'query' });
 
     let exclusiveStartKey: Record<string, NativeAttributeValue> | undefined;
@@ -131,8 +131,38 @@ export class DynamodbManager {
     logger.info('out', { class: 'DynamodbManager', method: 'query' });
     return [
       response.Items?.map((item) => item as T) ?? [],
-      JSON.stringify(response.LastEvaluatedKey),
+      response.LastEvaluatedKey
+        ? JSON.stringify(response.LastEvaluatedKey)
+        : undefined,
     ];
+  }
+
+  public async queryAll<T>(
+    obj: { hashKey: string },
+    options?: {
+      exclusiveStartKeyStr?: string;
+      rangeKeyCondition?: Omit<Condition, 'AttributeValueList'> & {
+        AttributeValueList?: NativeAttributeValue[];
+      };
+      scanIndexForward?: boolean;
+    }
+  ): Promise<T[]> {
+    logger.info('in', { class: 'DynamodbManager', method: 'queryAll' });
+
+    const items: T[] = [];
+    let nextToken: string | undefined;
+    do {
+      const [result, newNextToken] = await this.query<T>(obj, {
+        exclusiveStartKeyStr: nextToken,
+        rangeKeyCondition: options?.rangeKeyCondition,
+        scanIndexForward: options?.scanIndexForward,
+      });
+      items.push(...result);
+      nextToken = newNextToken;
+    } while (typeof nextToken !== 'undefined');
+
+    logger.info('out', { class: 'DynamodbManager', method: 'queryAll' });
+    return items;
   }
 
   /**
@@ -164,19 +194,19 @@ export class DynamodbManager {
   public async putAll<T extends DynamoDBEntity>(objs: T[]): Promise<void> {
     logger.info('in', { class: 'DynamodbManager', method: 'putAll' });
 
-    const requestItems = [
-      ...Array(Math.floor(objs.length / 25) + 1).keys(),
-    ].map((part) => {
-      return {
-        [this.objectTable]: objs
-          .slice(part * 25, (part + 1) * 25)
-          .map((obj) => ({
-            PutRequest: {
-              Item: obj,
-            },
-          })),
-      };
-    });
+    const requestItems = [...Array(Math.ceil(objs.length / 25)).keys()].map(
+      (part) => {
+        return {
+          [this.objectTable]: objs
+            .slice(part * 25, (part + 1) * 25)
+            .map((obj) => ({
+              PutRequest: {
+                Item: obj,
+              },
+            })),
+        };
+      }
+    );
 
     await Promise.all(
       requestItems.map(async (requestItem) => {
@@ -189,6 +219,43 @@ export class DynamodbManager {
     );
 
     logger.info('out', { class: 'DynamodbManager', method: 'putAll' });
+  }
+
+  /**
+   * Delete object from DynamoDB.
+   * @param objs objects
+   */
+  public async deleteAll<T extends DynamoDBEntity>(objs: T[]): Promise<void> {
+    logger.info('in', { class: 'DynamodbManager', method: 'deleteAll' });
+
+    const requestItems = [...Array(Math.ceil(objs.length / 25)).keys()].map(
+      (part) => {
+        return {
+          [this.objectTable]: objs
+            .slice(part * 25, (part + 1) * 25)
+            .map((obj) => ({
+              DeleteRequest: {
+                Key: {
+                  hashKey: obj.hashKey,
+                  rangeKey: obj.rangeKey,
+                },
+              },
+            })),
+        };
+      }
+    );
+
+    await Promise.all(
+      requestItems.map(async (requestItem) => {
+        const command = new BatchWriteCommand({
+          RequestItems: requestItem,
+        });
+        logger.debug('command', { command });
+        await this.documentClient.send(command);
+      })
+    );
+
+    logger.info('out', { class: 'DynamodbManager', method: 'deleteAll' });
   }
 
   public static createHashKey(

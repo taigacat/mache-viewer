@@ -9,12 +9,8 @@ export interface StreamRepository {
   /**
    * Find all streams
    * @param broadcasterId The broadcaster id to find streams for
-   * @param nextToken The next token to use for pagination
    */
-  findAllByBroadcasterId(
-    broadcasterId: string,
-    nextToken?: string
-  ): Promise<{ items: Stream[]; nextToken?: string }>;
+  findAllByBroadcasterId(broadcasterId: string): Promise<{ items: Stream[] }>;
 
   /**
    * Save a stream

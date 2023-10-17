@@ -4,6 +4,7 @@ import { GiftWithPoint } from '../domain/model/gift';
 import { DynamodbManager } from './dynamodb/dynamodb-manager';
 import 'reflect-metadata';
 import { logger } from '../logger';
+import { isEqual } from 'lodash';
 
 @injectable()
 export class GiftRepositoryImpl implements GiftRepository {
@@ -13,23 +14,34 @@ export class GiftRepositoryImpl implements GiftRepository {
     this.manager = DynamodbManager.getInstance();
   }
 
-  async findAllByStreamId(
+  async findByIndex(
     streamId: string,
-    start: number = 0,
-    nextToken?: string
-  ): Promise<{ items: GiftWithPoint[]; nextToken?: string }> {
+    index: number
+  ): Promise<GiftWithPoint | null> {
     const entity = {
       hashKey: this.createHashKey(streamId),
-      rangeKey: this.createRangeKey(start),
+      rangeKey: this.createRangeKey(index),
     };
-    const [items, newNextToken] = await this.manager.query<GiftWithPoint>(
-      entity,
+    const item = await this.manager.get<GiftWithPoint>(entity);
+    if (item === null) {
+      return null;
+    }
+    return item;
+  }
+
+  async findAllByStreamId(
+    streamId: string,
+    start: number = 0
+  ): Promise<{ items: GiftWithPoint[] }> {
+    const items: GiftWithPoint[] = await this.manager.queryAll<GiftWithPoint>(
       {
-        exclusiveStartKeyStr: nextToken,
+        hashKey: this.createHashKey(streamId),
+      },
+      {
         scanIndexForward: true,
         rangeKeyCondition: {
           ComparisonOperator: 'GE',
-          AttributeValueList: [entity.rangeKey],
+          AttributeValueList: [this.createRangeKey(start)],
         },
       }
     );
@@ -38,7 +50,6 @@ export class GiftRepositoryImpl implements GiftRepository {
         ...item,
         id: item.index,
       })),
-      nextToken: newNextToken,
     };
   }
 
@@ -49,7 +60,48 @@ export class GiftRepositoryImpl implements GiftRepository {
       return Promise.resolve();
     }
 
-    // TODO index = 0 のギフトが正しいとは限らない？→チェックする仕組みが必要になる
+    // index = 0 のギフトが正しいとは限らないのでチェックする
+    if (gifts[0].index === 0) {
+      const saved = await this.findAllByStreamId(gifts[0].streamId, 0);
+      // 入力のギフトが保存済のギフトよりも短い場合は、ほかにギフト情報を送っている人がすでにいると見なすことができる。
+      // 今までギフト情報を送っていた人がギフト情報を送らなくなった場合は、入力のギフトを保存済のギフトにつなげて保存するべきであるが、
+      // 今回は実装せず、エラーを返す。
+      if (saved && gifts.length < saved.items.length) {
+        return Promise.reject();
+      }
+
+      // 入力のギフトが保存済のギフトと同じか長い場合、index=0から順に一致を確認する
+      if (saved && saved.items.length <= gifts.length) {
+        if (
+          !isEqual(
+            saved.items.map(({ index, name, count, sender }) => ({
+              index,
+              name,
+              count,
+              sender,
+            })),
+            gifts
+              .slice(0, saved.items.length)
+              .map(({ index, name, count, sender }) => ({
+                index,
+                name,
+                count,
+                sender,
+              }))
+          )
+        ) {
+          //
+          return Promise.reject();
+        } else {
+          // 一致する場合は、途中から保存する
+          gifts = gifts.slice(saved.items.length);
+        }
+      }
+    }
+
+    if (gifts.length === 0) {
+      return Promise.resolve();
+    }
 
     await this.manager.putAll(
       gifts.map((gift) => ({
@@ -61,6 +113,18 @@ export class GiftRepositoryImpl implements GiftRepository {
       }))
     );
     logger.info('out', { class: 'GiftRepositoryImpl', method: 'saveAll' });
+  }
+
+  async deleteAll(streamId: string): Promise<void> {
+    logger.info('in', { class: 'GiftRepositoryImpl', method: 'deleteAll' });
+    const { items } = await this.findAllByStreamId(streamId, 0);
+    await this.manager.deleteAll(
+      items.map(({ streamId, index }) => ({
+        hashKey: this.createHashKey(streamId),
+        rangeKey: this.createRangeKey(index),
+      }))
+    );
+    logger.info('out', { class: 'GiftRepositoryImpl', method: 'deleteAll' });
   }
 
   private createHashKey(streamId: string): string {

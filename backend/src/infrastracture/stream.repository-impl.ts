@@ -27,19 +27,13 @@ export class StreamRepositoryImpl implements StreamRepository {
   }
 
   async findAllByBroadcasterId(
-    broadcasterId: string,
-    nextToken?: string
-  ): Promise<{ items: Stream[]; nextToken?: string }> {
-    const [items, newNextToken] = await this.manager.query<Stream>(
-      { hashKey: this.createHashKey(broadcasterId) },
-      {
-        exclusiveStartKeyStr: nextToken,
-        scanIndexForward: false,
-      }
-    );
+    broadcasterId: string
+  ): Promise<{ items: Stream[] }> {
+    const items = await this.manager.queryAll<Stream>({
+      hashKey: this.createHashKey(broadcasterId),
+    });
     return {
       items,
-      nextToken: newNextToken,
     };
   }
 
@@ -51,7 +45,7 @@ export class StreamRepositoryImpl implements StreamRepository {
       hashKey: this.createHashKey(stream.broadcasterId),
       rangeKey: this.createRangeKey(stream.id),
       updatedAt: now.toISOString(),
-      ttl: DynamodbManager.getTTL(60 * 60 * 24 * 30), // 30 days
+      ttl: DynamodbManager.getTTL(60 * 60 * 24 * 28), // 28 days (ログよりも早めに消す)
     });
     const item = await this.findById(stream.broadcasterId, stream.id);
     if (!item) {

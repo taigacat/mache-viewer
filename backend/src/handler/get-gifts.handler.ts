@@ -14,7 +14,6 @@ export const GetGiftsHandler: APIGatewayProxyHandler = async (event) => {
 
   const streamId = event.queryStringParameters['streamId'];
   const start = event.queryStringParameters['start'];
-  const nextToken = event.queryStringParameters['nextToken'];
 
   if (!streamId) {
     return {
@@ -28,7 +27,6 @@ export const GetGiftsHandler: APIGatewayProxyHandler = async (event) => {
   const response = await usecase.run({
     streamId,
     start: start ? parseInt(start) : undefined,
-    nextToken,
   });
 
   return {

@@ -14,7 +14,6 @@ export const GetStreamsHandler: APIGatewayProxyHandler = async (event) => {
   }
 
   const broadcasterId = event.queryStringParameters['broadcasterId'];
-  const nextToken = event.queryStringParameters['nextToken'];
 
   if (!broadcasterId) {
     return {
@@ -25,7 +24,7 @@ export const GetStreamsHandler: APIGatewayProxyHandler = async (event) => {
     };
   }
 
-  const result = await usecase.run({ broadcasterId, nextToken });
+  const result = await usecase.run({ broadcasterId });
 
   return {
     statusCode: 200,

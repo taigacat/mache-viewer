@@ -11,16 +11,22 @@ export class GetStreamListUsecase
       { items: Stream[]; nextToken?: string }
     >
 {
-  async run(input: {
-    broadcasterId: string;
-    nextToken?: string;
-  }): Promise<{ items: Stream[]; nextToken?: string }> {
+  async run(input: { broadcasterId: string }): Promise<{ items: Stream[] }> {
     const streamRepository = container.get<StreamRepository>(
       TYPES.StreamRepository
     );
-    return await streamRepository.findAllByBroadcasterId(
-      input.broadcasterId,
-      input.nextToken
+    const result = await streamRepository.findAllByBroadcasterId(
+      input.broadcasterId
     );
+    return {
+      items: result.items.sort((a, b) => {
+        if (!a.updatedAt || !b.updatedAt) {
+          return 0;
+        }
+        return (
+          new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+      }),
+    };
   }
 }

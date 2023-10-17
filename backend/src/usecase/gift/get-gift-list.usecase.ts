@@ -14,13 +14,11 @@ export class GetGiftListUsecase
   async run(input: {
     streamId: string;
     start?: number;
-    nextToken?: string;
-  }): Promise<{ items: GiftWithPoint[]; nextToken?: string }> {
+  }): Promise<{ items: GiftWithPoint[] }> {
     const repository = container.get<GiftRepository>(TYPES.GiftRepository);
     return await repository.findAllByStreamId(
       input.streamId,
-      input.start ? input.start : 0,
-      input.nextToken
+      input.start ? input.start : 0
     );
   }
 }
