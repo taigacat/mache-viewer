@@ -31,7 +31,7 @@
     "watch": "ng cache clean && ng build --watch --configuration development"
   },
   "dependencies": {
-    "@angular/animations": "^16.2.0",
+    "@angular/animations": "^16.2.11",
     "@angular/cdk": "^16.2.7",
     "@angular/common": "^16.2.0",
     "@angular/compiler": "^16.2.0",
