@@ -35,7 +35,7 @@
     "@types/aws-lambda": "^8.10.122",
     "@types/jest": "^29.5.5",
     "@types/lodash": "^4.14.199",
-    "@types/node": "^20.7.0",
+    "@types/node": "^20.9.2",
     "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@typescript-eslint/parser": "^6.7.3",
     "dotenv-webpack": "^8.0.1",
