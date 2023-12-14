@@ -40,7 +40,7 @@ jobs:
       - name: Zip backend
         run: zip -rj function.zip dist/*
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ServiceName }}-backend-${{ needs.version.outputs.build_version }}
           path: backend/function.zip
@@ -65,7 +65,7 @@ jobs:
       - name: Build frontend
         run: npm run build
       - name: Upload artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ServiceName }}-frontend-${{ needs.version.outputs.build_version }}
           path: frontend/dist
